@@ -6,3 +6,285 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+// ===================================
+// 🏢 Company (회사)
+// ===================================
+model Company {
+  id Int @id @default(autoincrement())
+  companyName String @unique
+  companyCode String @unique
+
+  // Relations
+  users User[]
+  cars Car[]
+  customers Customer[]
+  contracts Contract[]
+
+  // timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ===================================
+// 👨🏻‍💼 User (직원: 회사 소속, 관리자 포함)
+// ===================================
+model User {
+  id Int @id @default(autoincrement())
+  name String
+  email String @unique
+  password String
+  employeeNumber String 
+  phoneNumber String
+  imageUrl String?
+  isAdmin Boolean @default(false)
+
+  // Relations
+  companyId Int
+  company Company @relation(fields: [companyId], references: [id], onDelete: Restrict)
+
+  contracts Contract[]
+  uploadedDocs ContractDocument[] @relation("UploadedDocs")
+
+  // timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // indexes
+  @@index([companyId])
+  @@unique([companyId, employeeNumber])
+}
+
+// ===================================
+// 🚗 Car (차량)
+// ===================================
+model Car {
+  id Int @id @default(autoincrement())
+  carNumber String
+  maunfacturer String
+  model String
+  type CarType
+  status CarStatus @default(POSSESSION)
+
+  // 차량 상태
+  manufactureYear Int
+  mileage Int
+  price Int
+  accidentCount Int
+  explanation String?
+  accidentDetails String?
+
+
+  // Relations
+  companyId Int
+  company Company @relation(fields: [companyId], references: [id], onDelete: Restrict)
+
+  contracts Contract[]
+
+  // timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // indexes
+  @@index([companyId])
+  @@unique([companyId, carNumber])
+}
+
+// ===================================
+// 🧑🏻‍💼 Customer (고객)
+// ===================================
+model Customer {
+  id Int @id @default(autoincrement())
+  name String
+  gender Gender
+  phoneNumber String
+  ageGroup AgeGroup?
+  region Region?
+  email String?
+  memo String?
+
+  // Relations
+  companyId Int
+  company Company @relation(fields: [companyId], references: [id], onDelete:  Restrict)
+
+  contracts Contract[]
+
+  // timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // indexes
+  @@index([companyId])
+  @@index([companyId, name])
+  @@index([companyId, email])
+  @@unique([companyId, phoneNumber])
+  @@unique([companyId, email])
+}
+
+// ===================================
+// 📋 Contract (계약)
+// ===================================
+model Contract {
+  id Int @id @default(autoincrement())
+  status ContractStatus @default(CAR_INSPECTION)
+  contractName   String?
+  contractPrice  Int?
+  resolutionDate DateTime?
+
+  // Relations
+  companyId Int 
+  company Company @relation(fields: [companyId], references: [id], onDelete: Restrict)
+
+  userId Int? // 담당자(유저): 삭제 시 계약은 유지, 담당자만 null 
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  customerId Int // 고객: 삭제 시 관련 계약/미팅/알람/계약서 모두 삭제 
+  customer Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  carId Int // 차량: 삭제 시 관련 계약/미팅/알람/계약서 모두 삭제 
+  car Car @relation(fields: [carId], references: [id], onDelete: Cascade)
+
+  meetings  ContractMeeting[]
+  documents ContractDocument[]
+
+  // timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // indexes
+  @@index([companyId, status])
+  @@index([companyId, customerId])
+  @@index([companyId, carId])
+}
+
+// ===================================
+// 📆 ContractMeeting (계약 미팅)
+// ===================================
+model ContractMeeting {
+  id         Int      @id @default(autoincrement())
+  date   DateTime // 미팅 날짜 및 시간
+
+  // Relations
+  contractId Int
+  contract   Contract @relation(fields: [contractId], references: [id], onDelete: Cascade)
+
+  // timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  alarms MeetingAlarm[]
+
+  // indexes
+  @@index([contractId])
+}
+
+// ===================================
+// ⏰ MeetingAlarm (미팅 알람)
+// ===================================
+model MeetingAlarm {
+  id                Int             @id @default(autoincrement())
+  alarmAt DateTime // 알람 시간
+
+  // Relations
+  contractMeetingId Int
+  meeting           ContractMeeting @relation(fields: [contractMeetingId], references: [id], onDelete: Cascade)
+
+  // timestamps
+  @@index([contractMeetingId])
+} 
+
+// ===================================
+// 🗄️ ContractDocument (계약서 파일)
+// ===================================
+model ContractDocument {
+  id Int @id @default(autoincrement())
+  fileName    String // 원본 파일명
+  fileUrl     String // 저장된 파일 URL
+  fileSize    Int? // 파일 크기 (바이트 단위)
+  contentType String?  // MIME 타입
+
+  // Relations
+  contractId Int?
+  contract   Contract? @relation(fields: [contractId], references: [id], onDelete: Cascade)
+
+  uploadedByUserId Int?
+  uploadedByUser   User? @relation("UploadedDocs", fields: [uploadedByUserId], references: [id], onDelete: SetNull)
+
+  // timestamps
+  createdAt DateTime @default(now())
+
+  // indexes
+  @@index([contractId])
+}
+
+// ===================================
+// 🧩 ENUM 정의
+// ===================================
+
+enum Gender {
+  MALE // 남성
+  FEMALE // 여성
+}
+
+enum AgeGroup {
+  TEEN_10 // 10대
+  TWENTIES_20 // 20대
+  THIRTIES_30 // 30대
+  FORTIES_40 // 40대
+  FIFTIES_50 // 50대
+  SIXTIES_60 // 60대
+  SEVENTIES_70 // 70대
+  EIGHTIES_80 // 80대
+}
+
+enum Region {
+  SEOUL // 서울
+  GYEONGGI // 경기
+  INCHEON // 인천
+  GANGWON // 강원
+  CHUNGBUK // 충북
+  CHUNGNAM // 충남
+  SEJONG // 세종
+  DAEJEON // 대전
+  JEONBUK // 전북
+  JEONNAM // 전남
+  GWANGJU // 광주
+  GYEONGBUK // 경북
+  GYEONGNAM // 경남
+  DAEGU // 대구
+  ULSAN // 울산
+  BUSAN // 부산
+  JEJU // 제주
+}
+
+enum CarType {
+  COMPACT // 경·소형
+  MID_SIZE // 준중·중형
+  LARGE // 대형
+  SPORTS_CAR // 스포츠카
+  SUV
+} 
+
+enum CarStatus {
+  POSSESSION // 대기중
+  CONTRACT_PROCEEDING // 계약 진행중
+  CONTRACT_COMPLETED // 계약 완료
+}
+
+enum ContractStatus {
+  CAR_INSPECTION // 차량 점검
+  PRICE_NEGOTIATION // 가격 협상
+  CONTRACT_DRAFT // 계약서 초안
+  CONTRACT_SUCCESSFUL // 계약 성공
+  CONTRACT_FAILED // 계약 실패
+}
+
+// ===================================
+// 🚘 CarModel: /cars/models 응답용 (선택)
+// ===================================
+model CarModel {
+  id           Int     @id @default(autoincrement())
+  manufacturer String 
+  model        String 
+  type         CarType 
+}
