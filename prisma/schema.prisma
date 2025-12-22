@@ -61,13 +61,13 @@ model User {
 model Car {
   id Int @id @default(autoincrement())
   carNumber String
-  maunfacturer String
+  manufacturer String
   model String
   type CarType
   status CarStatus @default(POSSESSION)
 
   // 차량 상태
-  manufactureYear Int
+  manufacturingYear Int
   mileage Int
   price Int
   accidentCount Int
