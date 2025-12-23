@@ -45,6 +45,7 @@ model User {
 
   contracts Contract[]
   uploadedDocs ContractDocument[] @relation("UploadedDocs")
+  uploadedImages Image[] @relation("UploadedImages")
 
   // timestamps
   createdAt DateTime @default(now())
@@ -215,6 +216,27 @@ model ContractDocument {
 
   // indexes
   @@index([contractId])
+}
+
+// ===================================
+// 🖼️ Image (이미지)
+// ===================================
+model Image {
+  id          Int      @id @default(autoincrement())
+  fileName    String // 원본 파일명
+  fileUrl     String // 저장된 파일 URL
+  fileSize    Int? // 파일 크기 (바이트 단위)
+  contentType String?  // MIME 타입
+
+  // Relations
+  uploadedByUserId Int?
+  uploadedByUser   User? @relation("UploadedImages", fields: [uploadedByUserId], references: [id], onDelete: SetNull)
+
+  // timestamps
+  createdAt DateTime @default(now())
+
+  // indexes
+  @@index([uploadedByUserId])
 }
 
 // ===================================

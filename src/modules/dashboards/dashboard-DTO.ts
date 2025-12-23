@@ -21,19 +21,19 @@ export interface DashboardSummaryDTO {
   }
 }
 
-export interface vehicleType = 
-| 'COMPACT' // 경·소형
-| 'MID_SIZE' // 준중·중형
-| 'LARGE' // 대형
-| 'SPORTS_CAR' // 스포츠카
-| 'SUV';
+export type vehicleType =
+  | 'COMPACT'
+  | 'MID_SIZE'
+  | 'LARGE'
+  | 'SPORTS_CAR'
+  | 'SUV';
 
 export interface VehicleTypeCountDTO {
-  vehicleType: VehicleType;
+  vehicleType: vehicleType;
   count: number;
 }
 
 export interface VehicleTypeRevenueDTO {
-  vehicleType: VehicleType;
+  vehicleType: vehicleType;
   revenue: number;
 }   
