@@ -217,6 +217,23 @@ model ContractDocument {
   // indexes
   @@index([contractId])
 }
+// ===================================
+// 📊 DashBoard (대쉬보드)
+// ===================================
+
+model DashBoard {
+  id Int @id @default(autoincrement())
+  title String
+  description String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  userId Int
+  
+  // indexes
+  @@index([userId])
+}
 
 // ===================================
 // 🖼️ Image (이미지)
@@ -237,6 +254,33 @@ model Image {
 
   // indexes
   @@index([uploadedByUserId])
+}
+
+// ===================================
+// 📤 Uploads (업로드)
+// ===================================
+model Uploads {
+id         Int      @id @default(autoincrement())
+
+// 연결 대상
+targetType String
+targetId   Int
+
+// 파일 정보
+fileName   String // 원본 파일명
+filePath   String // 저장된 파일 경로
+mimeType   String  // MIME 타입
+size       Int     // 파일 크기 (바이트 단위)
+
+// 계약서 역할
+fileType   String
+
+// 타임스탬프
+uploadedBy Int?
+createdAt  DateTime @default(now())
+updatedAt  DateTime @updatedAt
+
+@@index([targetType, targetId])
 }
 
 // ===================================

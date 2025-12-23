@@ -3,21 +3,13 @@ import { DashboardDTO } from './dashboard-DTO.js';
 
 const prisma = new Prisma.PrismaClient();
 
-export const getDashboard = async () : Promise<DashboardDTO[]> => {
-  const [
-    summary,
-    contractsByVehicleType,
-    revenueByVehicleType,
-  ] = await Promise.all([
-    getSummary(),
-    getContractsByVehicleType(),
-    getRevenueByVehicleType(),
-  ]);
-
-  return {
-    summary,
-    contractsByVehicleType,
-    revenueByVehicleType,
-  };
-};
-
+export class DashBoardService {
+  async getDashboardData(): Promise<DashboardDTO> {
+    return {
+      contracts: await prisma.contract.groupBy({
+        by: ['status'],
+        _count: true,
+      }),
+    };
+  }
+}
