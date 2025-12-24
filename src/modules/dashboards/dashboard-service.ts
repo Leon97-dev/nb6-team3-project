@@ -9,15 +9,43 @@ export const getDashboard = async () : Promise<DashboardDTO[]> => {
     contractsByVehicleType,
     revenueByVehicleType,
   ] = await Promise.all([
-    getSummary(),
-    getContractsByVehicleType(),
-    getRevenueByVehicleType(),
+    prisma.$queryRaw<DashboardDTO[]>`
+      SELECT
+        COUNT(*) AS totalContracts,
+        SUM(amount) AS totalRevenue,
+        AVG(amount) AS averageContractValue
+      FROM
+        contracts
+      WHERE
+        status = 'active';
+    `,
+    prisma.$queryRaw<DashboardDTO[]>`
+      SELECT
+        vehicle_type,
+        COUNT(*) AS contractCount
+      FROM
+        contracts
+      WHERE
+        status = 'active'
+      GROUP BY
+        vehicle_type;
+    `,
+    prisma.$queryRaw<DashboardDTO[]>`
+      SELECT
+        vehicle_type,
+        SUM(amount) AS totalRevenue
+      FROM
+        contracts
+      WHERE
+        status = 'active'
+      GROUP BY
+        vehicle_type;
+    `,
   ]);
 
-  return {
-    summary,
-    contractsByVehicleType,
-    revenueByVehicleType,
-  };
-};
-
+  return [
+    ...summary,
+    ...contractsByVehicleType,
+    ...revenueByVehicleType,
+  ];
+} ;
