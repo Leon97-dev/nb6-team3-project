@@ -217,44 +217,6 @@ model ContractDocument {
   // indexes
   @@index([contractId])
 }
-// ===================================
-// 📊 DashBoard (대쉬보드)
-// ===================================
-
-model DashBoard {
-  id Int @id @default(autoincrement())
-  title String
-  description String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // Relations
-  userId Int
-  
-  // indexes
-  @@index([userId])
-}
-
-// ===================================
-// 🖼️ Image (이미지)
-// ===================================
-model Image {
-  id          Int      @id @default(autoincrement())
-  fileName    String // 원본 파일명
-  fileUrl     String // 저장된 파일 URL
-  fileSize    Int? // 파일 크기 (바이트 단위)
-  contentType String?  // MIME 타입
-
-  // Relations
-  uploadedByUserId Int?
-  uploadedByUser   User? @relation("UploadedImages", fields: [uploadedByUserId], references: [id], onDelete: SetNull)
-
-  // timestamps
-  createdAt DateTime @default(now())
-
-  // indexes
-  @@index([uploadedByUserId])
-}
 
 // ===================================
 // 📤 Uploads (업로드)
