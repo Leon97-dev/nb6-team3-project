@@ -219,24 +219,52 @@ model ContractDocument {
 }
 
 // ===================================
-// 🖼️ Image (이미지)
+//  📊 Dashboards (대시보드)
 // ===================================
-model Image {
+model Dashboard {
   id          Int      @id @default(autoincrement())
-  fileName    String // 원본 파일명
-  fileUrl     String // 저장된 파일 URL
-  fileSize    Int? // 파일 크기 (바이트 단위)
-  contentType String?  // MIME 타입
+  name        String   @unique
+  description String?
+  data        Json     // 대시보드 데이터 (JSON 형식) 
+  // timestamps
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
 
-  // Relations
-  uploadedByUserId Int?
-  uploadedByUser   User? @relation("UploadedImages", fields: [uploadedByUserId], references: [id], onDelete: SetNull)
+model Vehicle {
+  id           Int     @id @default(autoincrement())
+  modelName    String 
+  type         CarType
+  status       CarStatus  @default(POSSESSION)  
 
   // timestamps
-  createdAt DateTime @default(now())
+  createdAt    DateTime @default(now())
+}
 
-  // indexes
-  @@index([uploadedByUserId])
+model customer {
+  id           Int     @id @default(autoincrement())
+  name         String
+  phoneNumber  String  @unique
+
+  // timestamps
+  createdAt    DateTime @default(now())
+}
+
+model contract {
+  id           Int     @id @default(autoincrement())
+  price        Int  // 계약금
+  status       ContractStatus @default(CAR_INSPECTION)
+  startDate    DateTime
+  endDate      DateTime
+  
+  // timestamps
+  createdAt    DateTime @default(now())
+  
+  customerId   String
+  vehicleId    String
+
+  customer     Customer @relation(fields: [customerId], references: [id])
+  vehicle      Vehicle  @relation(fields: [vehicleId], references: [id])
 }
 
 // ===================================
