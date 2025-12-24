@@ -14,6 +14,23 @@ class UserServiceController {
         const contract = await contractService.register(validatedData);
         return res.status(201).json(contract);
     };
+
+    findAll: RequestHandler = async (req, res) => {
+        const { searchBy, keyword } = req.query;
+        // if(!searchBy || !keyword) return new ValidationError("잘못된 요청입니다.");
+        if (searchBy) {
+            if (searchBy === "customerName" || searchBy === 'userName') {
+            }
+            else {
+                return new ValidationError("잘못된 요청입니다.");
+            }
+        }
+        const contracts = await contractService.findAll(
+            searchBy as string,
+            keyword as string
+        );
+        return res.status(200).json(contracts);
+    };
 }
 
 export const userServiceController = new UserServiceController();

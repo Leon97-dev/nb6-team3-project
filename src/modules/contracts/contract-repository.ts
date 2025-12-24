@@ -1,5 +1,6 @@
 import prisma from './../../configs/prisma.js';
-import { CreateContract } from './../../utils/interface.js';
+import { CreateContract } from '../../utils/contract-interface.js';
+import { Prisma } from '@prisma/client';
 
 class ContractRepository {
     async create(data: CreateContract) {
@@ -58,6 +59,45 @@ class ContractRepository {
             }
         });
         return contract;
+    };
+    async findAll(where: Prisma.ContractWhereInput) {
+        return await prisma.contract.findMany({
+            where,
+            select: {
+                id: true,
+                status: true,
+                resolutionDate: true,
+                contractPrice: true,
+                meetings: {
+                    select: {
+                        date: true,
+                        alarms: {
+                            select: {
+                                alarmAt: true,
+                            },
+                        },
+                    },
+                },
+                user: {
+                    select: {
+                        id: true,
+                        name: true,
+                    },
+                },
+                customer: {
+                    select: {
+                        id: true,
+                        name: true,
+                    },
+                },
+                car: {
+                    select: {
+                        id: true,
+                        model: true,
+                    },
+                },
+            }
+        });
     };
 
     async findCompanyIdByCarId(carId: number) {
