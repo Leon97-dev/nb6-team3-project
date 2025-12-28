@@ -1,62 +1,67 @@
-// GET 차량 목록 조회
-interface Car {
-  id: number;
-  carNumber: string;
-  manufacturer: string;
-  model: string;
-  type: string;
-  manufacturingYear: number;
-  mileage: number;
-  price: number;
-  accidentCount: number;
-  explanation: string;
-  accidentDetails: string;
-  status: 'possession' | 'contractProceeding' | 'contractCompleted';
-}
+import { prisma } from 'prisma';
+import { CarStatus } from '@prisma/client';
 
 export class CarRepository {
-  private cars: Car[] = Array.from({ length: 50 }).map((_, index) => ({
-    id: index + 1,
-    carNumber: `12가${1000 + index}`,
-    manufacturer: 'Hyundai',
-    model: 'Sonata',
-    type: 'Sedan',
-    manufacturingYear: 2020,
-    mileage: 30,
-    price: 1000000,
-    accidentCount: 1,
-    explanation: 'string',
-    accidentDetails: 'string',
-    status: 'possession',
-  }));
+  async findCars(params: {
+    companyId: number;
+    skip: number;
+    take: number;
+    status?: CarStatus;
+    searchBy?: 'carNumber' | 'model';
+    keyword?: string;
+  }) {
+    const { companyId, skip, take, status, searchBy, keyword } = params;
 
-  async findCars({
-    page,
-    pageSize,
-    status,
-    searchBy,
-    keyword,
-  }: any): Promise<{ cars: Car[]; totalItemCount: number }> {
-    let filteredCars = [...this.cars];
+    return prisma.car.findMany({
+      where: {
+        companyId,
+        status,
+        ...(keyword && searchBy === 'carNumber'
+          ? { carNumber: { contains: keyword } }
+          : {}),
+        ...(keyword && searchBy === 'model'
+          ? { carModel: { model: { contains: keyword } } }
+          : {}),
+      },
+      include: {
+        carModel: true,
+      },
+      skip,
+      take,
+    });
+  }
 
-    if (status) {
-      filteredCars = filteredCars.filter((car) => car.status === status);
-    }
+  async countCars(companyId: number) {
+    return prisma.car.count({ where: { companyId } });
+  }
 
-    if (searchBy && keyword) {
-      filteredCars = filteredCars.filter((car) =>
-        car[searchBy].includes(keyword)
-      );
-    }
+  async findCarById(companyId: number, carId: number) {
+    return prisma.car.findFirst({
+      where: { id: carId, companyId },
+      include: { carModel: true },
+    });
+  }
 
-    const totalItemCount = filteredCars.length;
+  async createCar(data: any) {
+    return prisma.car.create({ data });
+  }
 
-    const start = (page - 1) * pageSize;
-    const end = start + pageSize;
+  async updateCar(carId: number, data: any) {
+    return prisma.car.update({
+      where: { id: carId },
+      data,
+    });
+  }
 
-    return {
-      cars: filteredCars.slice(start, end),
-      totalItemCount,
-    };
+  async deleteCar(carId: number) {
+    return prisma.car.delete({ where: { id: carId } });
+  }
+
+  async findOrCreateCarModel(manufacturer: string, model: string, type: any) {
+    return prisma.carModel.upsert({
+      where: { manufacturer_model: { manufacturer, model } },
+      update: {},
+      create: { manufacturer, model, type },
+    });
   }
 }

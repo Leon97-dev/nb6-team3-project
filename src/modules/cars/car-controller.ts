@@ -1,21 +1,64 @@
 import { Request, Response } from 'express';
 import { CarService } from './car-service.js';
+import { AuthRequest } from '../../middlewares/auth.js';
 
-// GET 차량 목록 조회
 const carService = new CarService();
 
-export const getCars = async (req: Request, res: Response) => {
-  try {
-    const result = await carService.getCars({
-      page: Number(req.query.page),
-      pageSize: Number(req.query.pageSize),
-      status: req.query.status as string,
-      searchBy: req.query.searchBy as string,
-      keyword: req.query.keyword as string,
-    });
-
-    return res.status(200).json(result);
-  } catch (error) {
-    return res.status(400).json({ message: '잘못된 요청입니다' });
+export class CarController {
+  async getCars(req: AuthRequest, res: Response) {
+    try {
+      const result = await carService.getCarList(
+        req.query,
+        req.user!.companyId
+      );
+      res.json(result);
+    } catch (e: any) {
+      res.status(400).json({ message: e.message });
+    }
   }
-};
+
+  async getCar(req: AuthRequest, res: Response) {
+    try {
+      const carId = Number(req.params.carId);
+      const result = await carService.getCarDetail(carId, req.user!.companyId);
+      res.json(result);
+    } catch (e: any) {
+      res.status(e.message.includes('존재') ? 404 : 400).json({
+        message: e.message,
+      });
+    }
+  }
+
+  async createCar(req: AuthRequest, res: Response) {
+    try {
+      const car = await carService.createCar(req.body, req.user!.companyId);
+      res.status(201).json(car);
+    } catch (e: any) {
+      res.status(400).json({ message: e.message });
+    }
+  }
+
+  async updateCar(req: AuthRequest, res: Response) {
+    try {
+      const carId = Number(req.params.carId);
+      const car = await carService.updateCar(
+        carId,
+        req.body,
+        req.user!.companyId
+      );
+      res.json(car);
+    } catch (e: any) {
+      res.status(404).json({ message: e.message });
+    }
+  }
+
+  async deleteCar(req: AuthRequest, res: Response) {
+    try {
+      const carId = Number(req.params.carId);
+      await carService.deleteCar(carId, req.user!.companyId);
+      res.json({ message: '차량 삭제 성공' });
+    } catch (e: any) {
+      res.status(404).json({ message: e.message });
+    }
+  }
+}
