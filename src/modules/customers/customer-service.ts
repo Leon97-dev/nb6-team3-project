@@ -1,10 +1,10 @@
-import prisma from '../../configs/prisma.js';
+import { prisma } from '../../configs/prisma.js';
 import { CustomerRepository } from './customer-repository.js';
 import type {
   CreateCustomerBody,
   UpdateCustomerBody,
   ListCustomersQuery,
-} from './customer-validator.js';
+} from './customer-validator.ts';
 
 export class HttpError extends Error {
   constructor(
@@ -78,7 +78,7 @@ export class CustomerService {
 
   async get(customerId: number): Promise<CustomerDTO> {
     const customer = await this.repo.findById(customerId);
-    if (!customer) throw new HttpError(404, '고객을 찾을 수 없습니다.');
+    if (!customer) throw new HttpError(404, '존재하지 않는 고객입니다.');
     return this.toDTO(customer);
   }
 
@@ -87,7 +87,7 @@ export class CustomerService {
     body: UpdateCustomerBody
   ): Promise<CustomerDTO> {
     const exists = await this.repo.findById(customerId);
-    if (!exists) throw new HttpError(404, '고객을 찾을 수 없습니다.');
+    if (!exists) throw new HttpError(404, '존재하지 않는 고객입니다.');
 
     const updated = await this.repo.update(customerId, body as any);
     return this.toDTO(updated);
@@ -95,7 +95,7 @@ export class CustomerService {
 
   async delete(customerId: number): Promise<void> {
     const exists = await this.repo.findById(customerId);
-    if (!exists) throw new HttpError(404, '고객을 찾을 수 없습니다.');
+    if (!exists) throw new HttpError(404, '존재하지 않는 고객입니다.');
 
     await this.repo.delete(customerId);
   }
