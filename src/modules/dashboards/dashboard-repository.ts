@@ -10,7 +10,14 @@ import Prisma from '@prisma/client';
 
 const prisma = new Prisma.PrismaClient();
 
+type getSummary = {
+  total_contracts: bigint;
+  total_revenue: number | null;
+  average_revenue_per_contract: number | null;
+};
+
 export const getSummary = async () => {
+
   return prisma.$queryRaw`
     SELECT 
       COUNT(*) AS total_contracts,
@@ -20,21 +27,17 @@ export const getSummary = async () => {
   `;
 }               
 
-export const getContractsByVehicleType = async () => {
+type VehicleTypeStats = {
+  vehicleType: string;
+  contract_count: bigint;
+  total_revenue: number | null;
+};
+
+export const VehicleTypeStats = async () => {
   return prisma.$queryRaw`
     SELECT 
       vehicleType,
       COUNT(*) AS contract_count,
-      SUM(amount) AS total_revenue
-    FROM contracts
-    GROUP BY vehicleType;
-  `;
-}
-
-export const getRevenueByVehicleType = async () => {
-  return prisma.$queryRaw`
-    SELECT 
-      vehicleType,
       SUM(amount) AS total_revenue
     FROM contracts
     GROUP BY vehicleType;
