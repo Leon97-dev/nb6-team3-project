@@ -1,13 +1,19 @@
+/**
+ * @description 대시보드 컨트롤러 모듈
+ * 대시보드 관련 요청을 처리하는 기능을 제공합니다.
+ * @author 정현준
+ * @date 2025-12-29
+ * @version 1.0
+ **/
+
 import { Request, Response } from 'express';
 import { DashboardService } from './dashboard-service';
-import { DashboardDTO } from './dashboard-DTO.js';
 
 export const getDashboardData = async (req: Request, res: Response) => {
     try {
         const { userId } = req.params;
         const dashboardData = await DashboardService.fetchDashboardData(userId);
-        const dashboardDTO = new DashboardDTO(dashboardData);
-        res.status(200).json(dashboardDTO);
+        res.status(200).json(dashboardData);
     } catch (error) {
         res.status(500).json({ message: 'Error fetching dashboard data', error });
     }

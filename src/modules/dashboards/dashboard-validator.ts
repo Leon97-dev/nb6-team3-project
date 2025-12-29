@@ -1,3 +1,11 @@
+/**
+ * @description 대시보드 벨리데이터 모듈
+ * 대시보드 생성을 위한 요청을 검증하는 기능을 제공합니다.
+ * @author 정현준
+ * @date 2025-12-29
+ * @version 1.0
+ **/
+
 import { Request, Response, NextFunction } from 'express';
 
 export const validateDashboardRequest = (

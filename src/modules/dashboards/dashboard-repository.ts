@@ -1,3 +1,11 @@
+/**
+ * @description 대시보드 리포지토리 모듈
+ * 대시보드 관련 데이터베이스 쿼리를 처리하는 기능을 제공합니다.
+ * @author 정현준
+ * @date 2025-12-29
+ * @version 1.0
+ **/
+
 import Prisma from '@prisma/client';
 
 const prisma = new Prisma.PrismaClient();
