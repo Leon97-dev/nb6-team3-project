@@ -1,10 +1,11 @@
-import { prisma } from '../../configs/prisma.js';
+import prisma from '../../configs/prisma.js';
 import { CustomerRepository } from './customer-repository.js';
+import type { AgeGroup, Customer, Gender, Region } from '@prisma/client';
 import type {
   CreateCustomerBody,
   UpdateCustomerBody,
   ListCustomersQuery,
-} from './customer-validator.ts';
+} from './customer-validator.js';
 
 export class HttpError extends Error {
   constructor(
@@ -18,10 +19,10 @@ export class HttpError extends Error {
 export type CustomerDTO = {
   id: number;
   name: string;
-  gender: 'male' | 'female';
+  gender: Gender;
   phoneNumber: string;
-  ageGroup: string | null;
-  region: string | null;
+  ageGroup: AgeGroup | null;
+  region: Region | null;
   email: string | null;
   memo: string | null;
   contractCount: number;
@@ -34,16 +35,7 @@ export type CustomerListResponse = {
   data: CustomerDTO[];
 };
 
-type CustomerRecord = {
-  id: number;
-  name: string;
-  gender: 'male' | 'female';
-  phoneNumber: string;
-  ageGroup: string | null;
-  region: string | null;
-  email: string | null;
-  memo: string | null;
-};
+type CustomerRecord = Customer;
 
 export class CustomerService {
   constructor(private repo = new CustomerRepository()) {}
