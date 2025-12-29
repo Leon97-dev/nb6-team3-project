@@ -1,7 +1,8 @@
 
 import contractRepository from './contract-repository.js';
 import * as ContractInterface from '../../utils/contract-interface.js';
-import { NotFoundError } from './../../errors/error-handler.js';
+import { NotFoundError, ValidationError } from './../../errors/error-handler.js';
+import { Prisma } from '@prisma/client';
 
 
 class ContractService {
@@ -64,6 +65,41 @@ class ContractService {
         return groupedContracts;
     }
 
+    async patchContract(id: number, data: ContractInterface.PatchContract) {
+        const { meetings, contractDocuments, ...rest } = data;
+
+        // exactOptionalPropertyTypes 대응: undefined인 필드는 제외하고 객체 생성
+        const updateData: Prisma.ContractUpdateInput = { ...rest };
+
+        // 관계 데이터 처리 (기존 데이터를 삭제하고 새로 생성하는 방식)
+        if (meetings) {
+            updateData.meetings = {
+                deleteMany: {}, // 기존 미팅 삭제
+                create: meetings.map((meeting) => ({
+                    date: meeting.date,
+                    alarms: {
+                        create: meeting.alarms.map((alarm) => ({
+                            alarmAt: alarm
+                        }))
+                    }
+                }))
+            };
+        }
+
+        if (contractDocuments) {
+            updateData.documents = {
+                deleteMany: {}, // 기존 문서 연결/데이터 삭제
+                create: contractDocuments.map((doc) => ({
+                    fileName: doc.fileName,
+                    fileUrl: doc.fileUrl
+                }))
+            };
+        }
+        const patchedData = await contractRepository.patchContract(id, updateData);
+        if (!patchedData) return new NotFoundError("존재하지 않는 계약입니다");
+
+        return patchedData;
+    }
 
 };
 

@@ -1,3 +1,5 @@
+import { ContractStatus } from '@prisma/client';
+
 interface CreateContract {
     contractName: string;
     contractPrice: number;
@@ -20,7 +22,27 @@ interface CreateContractPublic {
     }[];
 }
 
+interface PatchContract {
+    userId?: number;
+    customerId?: number;
+    carId?: number;
+    status?: ContractStatus;
+    resolutionDate?: Date;
+    contractPrice?: number;
+    meetings?: {
+        date: Date;
+        alarms: Date[];
+    }[];
+    contractDocuments?: {
+        id: number;
+        fileName: string;
+        fileUrl: string;
+    }[];
+}
+
 export {
     CreateContract,
-    CreateContractPublic
+    CreateContractPublic,
+    PatchContract,
+    ContractStatus
 };

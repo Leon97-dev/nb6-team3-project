@@ -1,7 +1,7 @@
 import { RequestHandler } from 'express';
 import * as s from 'superstruct';
 import { contractService } from './contract-service.js';
-import { CreateContractStruct } from '../../utils/contract-struct.js';
+import { CreateContractStruct, PatchContractStruct } from '../../utils/contract-struct.js';
 import { ValidationError } from '../../errors/error-handler.js';
 
 
@@ -30,6 +30,13 @@ class UserServiceController {
             keyword as string
         );
         return res.status(200).json(contracts);
+    };
+    patchContract: RequestHandler = async (req, res) => {
+        const id = req.params.id;
+        if (!id) return new ValidationError("잘못된 요청 입니다.(id)");
+        const validatedData = s.create(req.body, PatchContractStruct);
+        if (!validatedData) return new ValidationError("잘못된 요청입니다.");
+
     };
 }
 

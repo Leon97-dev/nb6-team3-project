@@ -110,6 +110,14 @@ class ContractRepository {
         });
         return companyId;
     };
+    async patchContract(id: number, data: Prisma.ContractUpdateInput) {
+        return await prisma.contract.update({
+            where: {
+                id,
+            },
+            data,
+        });
+    };
 }
 const contractRepository = new ContractRepository();
 export default contractRepository;

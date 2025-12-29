@@ -9,5 +9,7 @@ constractRouter.post('/', asyncHandler(userServiceController.register));
 
 constractRouter.get('/', asyncHandler(userServiceController.findAll));
 
+constractRouter.patch('/:id', asyncHandler(userServiceController.patchContract));
+
 
 export default constractRouter;

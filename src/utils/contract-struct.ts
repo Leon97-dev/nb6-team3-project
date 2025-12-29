@@ -1,4 +1,5 @@
 import * as s from 'superstruct';
+import * as ContractInterface from './contract-interface.js';
 
 // 문자열이 들어오면 숫자로 변환해주는 커스텀 구조체
 const CoercedNumber = s.coerce(s.number(), s.union([s.number(), s.string()]), (value) =>
@@ -22,3 +23,28 @@ export const CreateContractStruct = s.object({
         3
     ),
 });
+
+export const PatchContractStruct = s.partial(s.object({
+    userId: CoercedNumber,
+    customerId: CoercedNumber,
+    carId: CoercedNumber,
+    status: s.enums(Object.values(ContractInterface.ContractStatus)),
+    resolutionDate: CoercedDate,
+    contractPrice: CoercedNumber,
+    meetings: s.size(
+        s.array(
+            s.object({
+                date: CoercedDate,
+                alarms: s.array(CoercedDate)
+            })
+        ),
+        0,
+        3
+    ),
+    contractDocuments: s.array(
+        s.object({
+            id: CoercedNumber,
+            fileName: s.string()
+        })
+    ),
+}));
