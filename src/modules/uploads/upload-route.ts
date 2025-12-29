@@ -8,7 +8,7 @@
 
 import { Router } from 'express';
 import multer from 'multer';
-import { uploadController } from './upload-controller';
+import { uploadController } from './upload.controller';
 
 // Multer 설정 (메모리 저장소 사용 예시)
 const storage = multer.memoryStorage();
