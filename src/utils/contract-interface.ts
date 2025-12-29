@@ -1,9 +1,9 @@
 import { ContractStatus } from '@prisma/client';
 
 interface CreateContract {
-    contractName: string;
-    contractPrice: number;
-    resolutionDate: Date;
+    contractName?: string | undefined;
+    contractPrice?: number | undefined;
+    resolutionDate?: Date | undefined;
     companyId: number;
     carId: number;
     customerId: number;
@@ -14,6 +14,8 @@ interface CreateContract {
 }
 //계약 등록시 프론트로부터 받는 바디값
 interface CreateContractPublic {
+    contractName?: string | undefined;
+    contractPrice?: number | undefined;
     carId: number;
     customerId: number;
     meetings: {

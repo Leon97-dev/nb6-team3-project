@@ -6,9 +6,9 @@ class ContractRepository {
     async create(data: CreateContract) {
         const contract = await prisma.contract.create({
             data: {
-                contractName: data.contractName,
-                contractPrice: data.contractPrice,
-                resolutionDate: data.resolutionDate,
+                contractName: data.contractName ?? null,
+                contractPrice: data.contractPrice ?? null,
+                resolutionDate: data.resolutionDate ?? null,
                 companyId: data.companyId,
                 carId: data.carId,
                 customerId: data.customerId,
@@ -118,6 +118,47 @@ class ContractRepository {
             data,
         });
     };
+    async deleteContract(id: number) {
+        try {
+            return await prisma.contract.delete({
+                where: { id }
+            });
+        } catch (error) {
+            return null;
+        }
+    }
+    //Todo - 차량 계약 관련 api 병합시 status 가 POSSESSION인지,
+    //       차량 모델관련 변수가 model이 맞는지 추가 확인 필요
+    async findCarList() {
+        return await prisma.car.findMany({
+            where: {
+                status: "POSSESSION"
+            },
+            select: {
+                id: true,
+                model: true,
+                carNumber: true
+            }
+        });
+    }
+    async findCustomerList() {
+        return await prisma.customer.findMany({
+            select: {
+                id: true,
+                name: true,
+                email: true
+            }
+        });
+    }
+    async findUserList() {
+        return await prisma.user.findMany({
+            select: {
+                id: true,
+                name: true,
+                email: true
+            }
+        });
+    }
 }
 const contractRepository = new ContractRepository();
 export default contractRepository;

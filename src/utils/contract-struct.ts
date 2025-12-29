@@ -10,6 +10,8 @@ const CoercedNumber = s.coerce(s.number(), s.union([s.number(), s.string()]), (v
 const CoercedDate = s.coerce(s.date(), s.string(), (value) => new Date(value));
 
 export const CreateContractStruct = s.object({
+    contractName: s.optional(s.string()),
+    contractPrice: s.optional(CoercedNumber),
     carId: CoercedNumber, // 여기서 parseInt 처리가 일어납니다.
     customerId: CoercedNumber, // 여기서 parseInt 처리가 일어납니다.
     meetings: s.size(

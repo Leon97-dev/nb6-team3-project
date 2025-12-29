@@ -6,7 +6,7 @@ import { ValidationError } from '../../errors/error-handler.js';
 
 
 
-class UserServiceController {
+class ContractController {
     register: RequestHandler = async (req, res) => {
         // Struct를 사용하여 데이터 검증 및 타입 변환(parseInt 등) 수행
         const validatedData = s.create(req.body, CreateContractStruct);
@@ -37,12 +37,26 @@ class UserServiceController {
         const validatedData = s.create(req.body, PatchContractStruct);
         if (!validatedData) return new ValidationError("잘못된 요청입니다.");
         const patchedData = await contractService.patchContract(parseInt(id), validatedData);
-
+        return res.status(200).json(patchedData);
     };
     deleteContract: RequestHandler = async (req, res) => {
         const id = req.params.id;
         if (!id) return new ValidationError("잘못된 요청 입니다.(id)");
+        await contractService.deleteContract(parseInt(id));
+        return res.status(204).send();
+    };
+    findCarList: RequestHandler = async (req, res) => {
+        const carList = await contractService.findCarList();
+        return res.status(200).json(carList);
+    };
+    findCustomerList: RequestHandler = async (req, res) => {
+        const customerList = await contractService.findCustomerList();
+        return res.status(200).json(customerList);
+    };
+    findUserList: RequestHandler = async (req, res) => {
+        const userList = await contractService.findUserList();
+        return res.status(200).json(userList);
     };
 }
 
-export const userServiceController = new UserServiceController();
+export const contractController = new ContractController();

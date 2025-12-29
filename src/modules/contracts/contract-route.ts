@@ -1,17 +1,22 @@
 import express from 'express';
 import asyncHandler from '../../errors/async-handler.js';
-import { userServiceController } from './contract-controller.js';
+import { contractController } from './contract-controller.js';
 
-const constractRouter = express.Router();
+const contractRouter = express.Router();
 
 //인증 추가 작업 및 인증에 따른 로그인이 필요합니다 401 에러 처리 필요
-constractRouter.post('/', asyncHandler(userServiceController.register));
+contractRouter.post('/', asyncHandler(contractController.register));
 
-constractRouter.get('/', asyncHandler(userServiceController.findAll));
+contractRouter.get('/', asyncHandler(contractController.findAll));
 
-constractRouter.patch('/:id', asyncHandler(userServiceController.patchContract));
+contractRouter.patch('/:id', asyncHandler(contractController.patchContract));
 
-constractRouter.delete('/:id', asyncHandler(userServiceController.deleteContract));
+contractRouter.delete('/:id', asyncHandler(contractController.deleteContract));
 
 
-export default constractRouter;
+contractRouter.get('/cars', asyncHandler(contractController.findCarList));
+contractRouter.get('/customers', asyncHandler(contractController.findCustomerList));
+contractRouter.get('/users', asyncHandler(contractController.findUserList));
+
+
+export default contractRouter;

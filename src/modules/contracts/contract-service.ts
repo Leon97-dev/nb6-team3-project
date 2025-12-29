@@ -12,8 +12,6 @@ class ContractService {
         const readyData: ContractInterface.CreateContract = {
             ...contractData,
             companyId: companyId.companyId,
-            contractName: "",
-            contractPrice: 0,
             resolutionDate: new Date(),
         };
         const createdContractData = await contractRepository.create(readyData);
@@ -101,6 +99,38 @@ class ContractService {
         if (!patchedData) return new NotFoundError("존재하지 않는 계약입니다");
 
         return patchedData;
+    }
+    async deleteContract(id: number) {
+        const deletedContract = await contractRepository.deleteContract(id);
+        if (!deletedContract) return new NotFoundError("존재하지 않는 계약입니다.");
+        return deletedContract;
+    }
+    async findCarList() {
+        const carList = await contractRepository.findCarList();
+        if (!carList) throw new ValidationError("잘못된 요청입니다.");
+        const cars = carList.map((car) => ({
+            id: car.id,
+            data: `${car.model}(${car.carNumber})`
+        }));
+        return cars;
+    }
+    async findCustomerList() {
+        const customerList = await contractRepository.findCustomerList();
+        if (!customerList) throw new ValidationError("잘못된 요청입니다.");
+        const customers = customerList.map((data) => ({
+            id: data.id,
+            data: `${data.name}(${data.email})`
+        }));
+        return customers;
+    }
+    async findUserList() {
+        const userList = await contractRepository.findUserList();
+        if (!userList) throw new ValidationError("잘못된 요청입니다.");
+        const users = userList.map((data) => ({
+            id: data.id,
+            data: `${data.name}(${data.email})`
+        }));
+        return users;
     }
 
 };
