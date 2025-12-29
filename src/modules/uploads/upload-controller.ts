@@ -1,7 +1,7 @@
 /**
  * @description 업로드 컨트롤러 모듈
  * 파일 업로드를 처리하는 기능을 제공합니다.
- * @author 이호성
+ * @author 정현준
  * @date 2025-12-29
  * @version 1.0
  **/
