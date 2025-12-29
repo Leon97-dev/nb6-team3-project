@@ -37,10 +37,10 @@ export const createCustomerSchema = z.object({
   name: z.string().min(1, 'name은 필수입니다.'),
   gender: GenderSchema,
   phoneNumber: z.string().min(1, 'phoneNumber는 필수입니다.'),
-  ageGroup: AgeGroupSchema,
-  region: RegionSchema,
-  email: z.string().email('email 형식이 올바르지 않습니다.'),
-  memo: z.string(),
+  ageGroup: AgeGroupSchema.optional(),
+  region: RegionSchema.optional(),
+  email: z.string().email('email 형식이 올바르지 않습니다.').optional(),
+  memo: z.string().optional(),
 });
 
 export const updateCustomerBodySchema = createCustomerSchema;
@@ -59,3 +59,7 @@ export const listCustomersQuerySchema = z
   .refine((v) => (v.searchBy && v.keyword) || (!v.searchBy && !v.keyword), {
     message: 'searchBy와 keyword는 함께 사용해야 합니다.',
   });
+
+export type CreateCustomerBody = z.infer<typeof createCustomerSchema>;
+export type UpdateCustomerBody = z.infer<typeof updateCustomerBodySchema>;
+export type ListCustomersQuery = z.infer<typeof listCustomersQuerySchema>;
