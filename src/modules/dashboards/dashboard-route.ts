@@ -19,4 +19,35 @@ router.post(
   dashboardController.createDashboard
 );
 
+// 대시보드 조회 라우트
+ router.get(
+  '/dashboards/:userId',
+   dashboardController.getDashboardData
+  );
+
+// 대시보드 설정 업데이트 라우트
+  router.put(
+  '/dashboards/:userId',
+   dashboardController.updateDashboardSettings
+);
+
+// 대시보드 초기화 라우트
+   router.delete(
+  '/dashboards/:userId',
+   dashboardController.resetDashboard
+);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 export default router;  
