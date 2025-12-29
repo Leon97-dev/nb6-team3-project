@@ -36,7 +36,12 @@ class UserServiceController {
         if (!id) return new ValidationError("잘못된 요청 입니다.(id)");
         const validatedData = s.create(req.body, PatchContractStruct);
         if (!validatedData) return new ValidationError("잘못된 요청입니다.");
+        const patchedData = await contractService.patchContract(parseInt(id), validatedData);
 
+    };
+    deleteContract: RequestHandler = async (req, res) => {
+        const id = req.params.id;
+        if (!id) return new ValidationError("잘못된 요청 입니다.(id)");
     };
 }
 

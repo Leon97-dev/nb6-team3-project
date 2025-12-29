@@ -24,14 +24,14 @@ export const CreateContractStruct = s.object({
     ),
 });
 
-export const PatchContractStruct = s.partial(s.object({
-    userId: CoercedNumber,
-    customerId: CoercedNumber,
-    carId: CoercedNumber,
-    status: s.enums(Object.values(ContractInterface.ContractStatus)),
-    resolutionDate: CoercedDate,
-    contractPrice: CoercedNumber,
-    meetings: s.size(
+export const PatchContractStruct = s.object({
+    userId: s.optional(CoercedNumber),
+    customerId: s.optional(CoercedNumber),
+    carId: s.optional(CoercedNumber),
+    status: s.optional(s.enums(Object.values(ContractInterface.ContractStatus))),
+    resolutionDate: s.optional(CoercedDate),
+    contractPrice: s.optional(CoercedNumber),
+    meetings: s.optional(s.size(
         s.array(
             s.object({
                 date: CoercedDate,
@@ -40,11 +40,12 @@ export const PatchContractStruct = s.partial(s.object({
         ),
         0,
         3
-    ),
-    contractDocuments: s.array(
+    )),
+    contractDocuments: s.optional(s.array(
         s.object({
             id: CoercedNumber,
-            fileName: s.string()
+            fileName: s.string(),
+            fileUrl: s.string()
         })
-    ),
-}));
+    )),
+});

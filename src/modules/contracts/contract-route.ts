@@ -11,5 +11,7 @@ constractRouter.get('/', asyncHandler(userServiceController.findAll));
 
 constractRouter.patch('/:id', asyncHandler(userServiceController.patchContract));
 
+constractRouter.delete('/:id', asyncHandler(userServiceController.deleteContract));
+
 
 export default constractRouter;

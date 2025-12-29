@@ -23,21 +23,21 @@ interface CreateContractPublic {
 }
 
 interface PatchContract {
-    userId?: number;
-    customerId?: number;
-    carId?: number;
-    status?: ContractStatus;
-    resolutionDate?: Date;
-    contractPrice?: number;
+    userId?: number | undefined;
+    customerId?: number | undefined;
+    carId?: number | undefined;
+    status?: ContractStatus | undefined;
+    resolutionDate?: Date | undefined;
+    contractPrice?: number | undefined;
     meetings?: {
         date: Date;
         alarms: Date[];
-    }[];
+    }[] | undefined;
     contractDocuments?: {
         id: number;
         fileName: string;
         fileUrl: string;
-    }[];
+    }[] | undefined;
 }
 
 export {

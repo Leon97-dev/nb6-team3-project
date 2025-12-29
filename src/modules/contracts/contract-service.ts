@@ -69,7 +69,9 @@ class ContractService {
         const { meetings, contractDocuments, ...rest } = data;
 
         // exactOptionalPropertyTypes 대응: undefined인 필드는 제외하고 객체 생성
-        const updateData: Prisma.ContractUpdateInput = { ...rest };
+        const updateData: Prisma.ContractUpdateInput = Object.fromEntries(
+            Object.entries(rest).filter(([_, v]) => v !== undefined)
+        );
 
         // 관계 데이터 처리 (기존 데이터를 삭제하고 새로 생성하는 방식)
         if (meetings) {
