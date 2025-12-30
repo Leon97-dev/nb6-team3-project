@@ -1,8 +1,53 @@
-import { z } from 'zod';
+import {
+  type Infer,
+  coerce,
+  defaulted,
+  enums,
+  max,
+  number,
+  object,
+  optional,
+  refine,
+  size,
+  string,
+  union,
+} from 'superstruct';
 
-export const GenderSchema = z.enum(['male', 'female']);
+const requiredString = (message: string) =>
+  refine(string(), 'required', (value) => (value.length > 0 ? true : message));
 
-export const AgeGroupSchema = z.enum([
+const trimmedString = coerce(string(), string(), (value) => value.trim());
+
+const nonEmptyTrimmedString = refine(
+  trimmedString,
+  'nonEmpty',
+  (value) => value.length > 0
+);
+
+const emailString = refine(string(), 'email', (value) =>
+  /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)
+    ? true
+    : 'email 형식이 올바르지 않습니다.'
+);
+
+const coercedNumber = coerce(
+  number(),
+  union([string(), number()]),
+  (value) => {
+    const parsed = typeof value === 'string' ? Number(value) : value;
+    return Number.isNaN(parsed) ? value : parsed;
+  }
+);
+
+const intNumber = refine(coercedNumber, 'int', (value) =>
+  Number.isInteger(value)
+);
+
+const positiveInt = refine(intNumber, 'positive', (value) => value > 0);
+
+export const GenderSchema = enums(['male', 'female']);
+
+export const AgeGroupSchema = enums([
   '10대',
   '20대',
   '30대',
@@ -13,7 +58,7 @@ export const AgeGroupSchema = z.enum([
   '80대',
 ]);
 
-export const RegionSchema = z.enum([
+export const RegionSchema = enums([
   '서울',
   '경기',
   '인천',
@@ -33,33 +78,36 @@ export const RegionSchema = z.enum([
   '제주',
 ]);
 
-export const createCustomerSchema = z.object({
-  name: z.string().min(1, 'name은 필수입니다.'),
+export const createCustomerSchema = object({
+  name: requiredString('name은 필수입니다.'),
   gender: GenderSchema,
-  phoneNumber: z.string().min(1, 'phoneNumber는 필수입니다.'),
-  ageGroup: AgeGroupSchema.optional(),
-  region: RegionSchema.optional(),
-  email: z.string().email('email 형식이 올바르지 않습니다.').optional(),
-  memo: z.string().optional(),
+  phoneNumber: requiredString('phoneNumber는 필수입니다.'),
+  ageGroup: optional(AgeGroupSchema),
+  region: optional(RegionSchema),
+  email: optional(emailString),
+  memo: optional(string()),
 });
 
 export const updateCustomerBodySchema = createCustomerSchema;
 
-export const customerIdParamSchema = z.object({
-  customerId: z.coerce.number().int().positive(),
+export const customerIdParamSchema = object({
+  customerId: positiveInt,
 });
 
-export const listCustomersQuerySchema = z
-  .object({
-    page: z.coerce.number().int().positive().default(1),
-    pageSize: z.coerce.number().int().positive().max(100).default(10),
-    searchBy: z.enum(['name', 'email']).optional(),
-    keyword: z.string().trim().min(1).optional(),
-  })
-  .refine((v) => (v.searchBy && v.keyword) || (!v.searchBy && !v.keyword), {
-    message: 'searchBy와 keyword는 함께 사용해야 합니다.',
-  });
+export const listCustomersQuerySchema = refine(
+  object({
+    page: defaulted(positiveInt, 1),
+    pageSize: defaulted(max(positiveInt, 100), 10),
+    searchBy: optional(enums(['name', 'email'])),
+    keyword: optional(size(nonEmptyTrimmedString, 1, Infinity)),
+  }),
+  'searchByWithKeyword',
+  (value) =>
+    (value.searchBy && value.keyword) ||
+    (!value.searchBy && !value.keyword) ||
+    'searchBy와 keyword는 함께 사용해야 합니다.'
+);
 
-export type CreateCustomerBody = z.infer<typeof createCustomerSchema>;
-export type UpdateCustomerBody = z.infer<typeof updateCustomerBodySchema>;
-export type ListCustomersQuery = z.infer<typeof listCustomersQuerySchema>;
+export type CreateCustomerBody = Infer<typeof createCustomerSchema>;
+export type UpdateCustomerBody = Infer<typeof updateCustomerBodySchema>;
+export type ListCustomersQuery = Infer<typeof listCustomersQuerySchema>;
