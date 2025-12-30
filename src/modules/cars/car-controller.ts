@@ -62,3 +62,16 @@ export class CarController {
     }
   }
 }
+
+async uploadCSV(req: AuthRequest, res: Response) {
+  try {
+    await carService.uploadCSV(
+      req.file as Express.Multer.File,
+      req.user!.companyId,
+    );
+
+    res.json({ message: '성공적으로 등록되었습니다' });
+  } catch (e: any) {
+    res.status(400).json({ message: e.message });
+  }
+}

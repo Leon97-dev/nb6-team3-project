@@ -1,6 +1,8 @@
 import { CarRepository } from './car-repository.js';
 import { validateCreateCar } from './car-validator.js';
 import { CarStatus } from '@prisma/client';
+import csv from 'csv-parser';
+import { Readable } from 'stream';
 
 export class CarService {
   private carRepository = new CarRepository();
@@ -97,5 +99,42 @@ export class CarService {
     if (!car) throw new Error('존재하지 않는 차량입니다');
 
     await this.carRepository.deleteCar(carId);
+  }
+}
+
+async uploadCSV(file: Express.Multer.File, companyId: number) {
+  if (!file) {
+    throw new Error('잘못된 요청입니다');
+  }
+
+  const rows: any[] = [];
+
+  await new Promise<void>((resolve, reject) => {
+    Readable.from(file.buffer)
+      .pipe(csv())
+      .on('data', (row) => rows.push(row))
+      .on('end', resolve)
+      .on('error', reject);
+  });
+
+  for (const row of rows) {
+    const carModel = await this.carRepository.findOrCreateCarModel(
+      row.manufacturer,
+      row.model,
+      row.type,
+    );
+
+    await this.carRepository.createCar({
+      carNumber: row.carNumber,
+      manufacturingYear: Number(row.manufacturingYear),
+      mileage: Number(row.mileage),
+      price: Number(row.price),
+      accidentCount: Number(row.accidentCount),
+      explanation: row.explanation || null,
+      accidentDetails: row.accidentDetails || null,
+      status: 'POSSESSION',
+      companyId,
+      carModelId: carModel.id,
+    });
   }
 }
