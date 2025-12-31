@@ -19,6 +19,7 @@ import { debugLog } from './errors/debug.js';
 // ============================================
 import healthRoutes from './modules/common/health-route.js';
 import { imageRouter } from './modules/images/image-route.js';
+import dashboardRouter from './modules/dashboards/dashboard-route.js';
 
 // ============================================
 // 환경 변수 설정
@@ -43,6 +44,7 @@ app.use('/upload', express.static('public/uploads'));
 // ============================================
 app.use('/health', healthRoutes);
 app.use('/images', imageRouter);
+app.use('/dashboards', dashboardRouter);
 
 // ============================================
 // 404 핸들러 등록
