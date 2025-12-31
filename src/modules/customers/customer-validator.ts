@@ -82,10 +82,10 @@ export const createCustomerSchema = object({
   name: requiredString('name은 필수입니다.'),
   gender: GenderSchema,
   phoneNumber: requiredString('phoneNumber는 필수입니다.'),
-  ageGroup: optional(AgeGroupSchema),
-  region: optional(RegionSchema),
-  email: optional(emailString),
-  memo: optional(string()),
+  ageGroup: AgeGroupSchema,
+  region: RegionSchema,
+  email: emailString,
+  memo: string(),
 });
 
 export const updateCustomerBodySchema = createCustomerSchema;
@@ -111,3 +111,6 @@ export const listCustomersQuerySchema = refine(
 export type CreateCustomerBody = Infer<typeof createCustomerSchema>;
 export type UpdateCustomerBody = Infer<typeof updateCustomerBodySchema>;
 export type ListCustomersQuery = Infer<typeof listCustomersQuerySchema>;
+export type GenderValue = Infer<typeof GenderSchema>;
+export type AgeGroupValue = Infer<typeof AgeGroupSchema>;
+export type RegionValue = Infer<typeof RegionSchema>;

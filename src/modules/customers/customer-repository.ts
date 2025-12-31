@@ -3,22 +3,52 @@ import type { Customer, Prisma } from '@prisma/client';
 import type { ListCustomersQuery } from './customer-validator.js';
 
 export class CustomerRepository {
-  async create(data: Omit<Customer, 'id'>) {
-    return prisma.customer.create({
-      data: data as any,
+  async create(data: Prisma.CustomerCreateInput) {
+    return prisma.customer.create({ data });
+  }
+
+  async createMany(data: Prisma.CustomerCreateManyInput[]) {
+    return prisma.customer.createMany({ data });
+  }
+
+  async findById(customerId: number, companyId: number) {
+    return prisma.customer.findFirst({
+      where: { id: customerId, companyId },
     });
   }
 
-  async findById(customerId: number) {
-    return prisma.customer.findUnique({
-      where: { id: customerId },
+  async findByPhoneNumber(
+    companyId: number,
+    phoneNumber: string,
+    excludeCustomerId?: number
+  ) {
+    return prisma.customer.findFirst({
+      where: {
+        companyId,
+        phoneNumber,
+        ...(excludeCustomerId ? { id: { not: excludeCustomerId } } : {}),
+      },
     });
   }
 
-  async update(customerId: number, data: Partial<Omit<Customer, 'id'>>) {
+  async findByEmail(
+    companyId: number,
+    email: string,
+    excludeCustomerId?: number
+  ) {
+    return prisma.customer.findFirst({
+      where: {
+        companyId,
+        email,
+        ...(excludeCustomerId ? { id: { not: excludeCustomerId } } : {}),
+      },
+    });
+  }
+
+  async update(customerId: number, data: Prisma.CustomerUpdateInput) {
     return prisma.customer.update({
       where: { id: customerId },
-      data: data as any,
+      data,
     });
   }
 
@@ -29,29 +59,32 @@ export class CustomerRepository {
   }
 
   async list(
-    query: ListCustomersQuery
+    query: ListCustomersQuery,
+    companyId: number
   ): Promise<{ items: Customer[]; total: number }> {
     const { page, pageSize, searchBy, keyword } = query;
     const skip = (page - 1) * pageSize;
 
-    const where: Prisma.CustomerWhereInput | undefined =
-      searchBy && keyword
+    const where: Prisma.CustomerWhereInput = {
+      companyId,
+      ...(searchBy && keyword
         ? {
             [searchBy]: {
               contains: keyword,
               mode: 'insensitive',
             },
           }
-        : undefined;
+        : {}),
+    };
 
     const findArgs: Prisma.CustomerFindManyArgs = {
       skip,
       take: pageSize,
       orderBy: { id: 'desc' },
-      ...(where ? { where } : {}),
+      where,
     };
     const countArgs: Prisma.CustomerCountArgs = {
-      ...(where ? { where } : {}),
+      where,
     };
 
     const [items, total] = await prisma.$transaction([
