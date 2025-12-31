@@ -4,50 +4,25 @@
  * @author 정현준
  * @date 2025-12-29
  * @version 1.0
- **/        
-
+ **/
 import { Router } from 'express';
-import { dashboardController } from './dashboard-controller';
-import { validateDashboardRequest } from './dashboard-validator';
+import dashboardCtrl from './dashboard-controller.js';
 
 const router = Router();
 
-// 대시보드 생성 라우트
-router.post(
-  '/dashboards',
-  validateDashboardRequest,
-  dashboardController.createDashboard
-);
+// GET / - 모든 대시보드 조회
+router.get('/', dashboardCtrl.getAll);
 
-// 대시보드 조회 라우트
- router.get(
-  '/dashboards/:userId',
-   dashboardController.getDashboardData
-  );
+// POST / - 새 대시보ord 생성
+router.post('/', dashboardCtrl.create);
 
-// 대시보드 설정 업데이트 라우트
-  router.put(
-  '/dashboards/:userId',
-   dashboardController.updateDashboardSettings
-);
+// GET /:id - 특정 대시보드 조회
+router.get('/:id', dashboardCtrl.getById);
 
-// 대시보드 초기화 라우트
-   router.delete(
-  '/dashboards/:userId',
-   dashboardController.resetDashboard
-);
+// PUT /:id - 대시보드 업데이트
+router.put('/:id', dashboardCtrl.update);
 
-
-
-
-
-
-
-
-
-
-
-
-
+// DELETE /:id - 대시보드 삭제
+router.delete('/:id', dashboardCtrl.delete);
 
 export default router;  

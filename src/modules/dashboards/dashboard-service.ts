@@ -5,55 +5,41 @@
  * @date 2025-12-29
  * @version 1.0
  **/
+ 
+import prisma from '@/config/prisma.js';
+ 
+interface DashboardCreateDTO {
+  title: string;
+  content: string;
+  userId: number;
+}
 
-import Prisma from '@prisma/client';
-import { DashboardDTO } from './dashboard-DTO.js';
+interface DashboardUpdateDTO {
+  title?: string;
+  content?: string;
+}
 
-const prisma = new Prisma.PrismaClient();
+export const dashboardService = {
+  async createService(data: DashboardCreateDTO) {
+    return prisma.dashboard.create({ data });
+  },
 
-export const getDashboard = async () : Promise<DashboardDTO[]> => {
-  const [
-    summary,
-    contractsByVehicleType,
-    revenueByVehicleType,
-  ] = await Promise.all([
-    prisma.$queryRaw<DashboardDTO[]>`
-      SELECT
-        COUNT(*) AS totalContracts,
-        SUM(amount) AS totalRevenue,
-        AVG(amount) AS averageContractValue
-      FROM
-        contracts
-      WHERE
-        status = 'active';
-    `,
-    prisma.$queryRaw<DashboardDTO[]>`
-      SELECT
-        vehicle_type,
-        COUNT(*) AS contractCount
-      FROM
-        contracts
-      WHERE
-        status = 'active'
-      GROUP BY
-        vehicle_type;
-    `,
-    prisma.$queryRaw<DashboardDTO[]>`
-      SELECT
-        vehicle_type,
-        SUM(amount) AS totalRevenue
-      FROM
-        contracts
-      WHERE
-        status = 'active'
-      GROUP BY
-        vehicle_type;
-    `,
-  ]);
+  async getService(id: number) {
+    const dashboard = await prisma.dashboard.findUnique({ where: { id } });
+    if (!dashboard) {
+      throw new Error(`Dashboard with ID ${id} not found`);
+    }
+    return dashboard;
+  },
 
-  return [
-    ...summary,
-    ...contractsByVehicleType,
-    ...revenueByVehicleType,
-  ];
-} ;
+  async updateService(id: number, data: DashboardUpdateDTO) {
+    return prisma.dashboard.update({ where: { id }, data });
+  },
+
+  async deleteService(id: number) {
+    return prisma.dashboard.delete({ where: { id } });
+  },
+};
+
+export default dashboardService;
+

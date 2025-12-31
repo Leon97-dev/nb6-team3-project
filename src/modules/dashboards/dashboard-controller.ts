@@ -7,28 +7,67 @@
  **/
 
 import { Request, Response } from 'express';
-import { DashboardService } from './dashboard-service';
-import asyncHandler from '../../errors/async-handler.js';
+import asyncHandler from 'express-async-handler';
+import { dashboardService } from '../dashboards/dashboard-service.js';
 
+export const dashboardController = {
+  create: asyncHandler(async (req: Request, res: Response) => {
+    const { title, content } = req.body;
+    const userId = (req as any).user?.id;
 
-export const getDashboardData = asyncHandler(async (req, res) => {
-    
-        const { userId } = req.params;
-        const dashboardData = await DashboardService.fetchDashboardData(userId);
-        res.status(200).json(dashboardData);
-    });      
+    if (!userId) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
 
-export const updateDashboardSettings = asyncHandler(async (req, res) => {
-   
-        const { userId } = req.params;
-        const settings = req.body;
-        const updatedSettings = await DashboardService.updateDashboardSettings(userId, settings);
-        res.status(200).json(updatedSettings);
+    const dashboard = await dashboardService.createService({
+      title,
+      content,
+      userId,
     });
 
-export const resetDashboard = asyncHandler(async (req, res) => {
-  
-        const { userId } = req.params;
-        await DashboardService.resetDashboard(userId);
-        res.status(200).json({ message: 'Dashboard reset successfully' });
-});
+    res.status(201).json(dashboard);
+  }),
+
+  getById: asyncHandler(async (req: Request, res: Response) => {
+    const id = parseInt(req.params.id, 10);
+
+    if (Number.isNaN(id)) {
+      return res.status(400).json({ error: 'Invalid id' });
+    }
+
+    const dashboard = await dashboardService.getService(id);
+    res.json(dashboard);
+  }),
+
+  update: asyncHandler(async (req: Request, res: Response) => {
+    const id = parseInt(req.params.id, 10);
+    const { title, content } = req.body;
+
+    if (Number.isNaN(id)) {
+      return res.status(400).json({ error: 'Invalid id' });
+    }
+
+    const dashboard = await dashboardService.updateService(id, {
+      title,
+      content,
+    });
+
+    res.json(dashboard);
+  }),
+
+  delete: asyncHandler(async (req: Request, res: Response) => {
+    const id = parseInt(req.params.id, 10);
+
+    if (Number.isNaN(id)) {
+      return res.status(400).json({ error: 'Invalid id' });
+    }
+
+    await dashboardService.deleteService(id);
+    res.sendStatus(204);
+  }),
+};
+
+export default dashboardController;
+
+
+
