@@ -17,7 +17,7 @@ export class CarController {
     }
   }
 
-  async getCar(req: AuthRequest, res: Response) {
+  async getCar(req: Request, res: Response) {
     try {
       const carId = Number(req.params.carId);
       const result = await carService.getCarDetail(carId, req.user!.companyId);

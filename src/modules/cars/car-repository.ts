@@ -1,4 +1,4 @@
-import { prisma } from 'prisma';
+import prisma from '@prisma/client';
 import { CarStatus } from '@prisma/client';
 
 export class CarRepository {

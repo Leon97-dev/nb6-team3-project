@@ -1,16 +1,23 @@
 import { Router } from 'express';
 import { CarController } from './car-controller.js';
+import { authHeader } from '../../middlewares/auth.js';
+import { uploadCSV } from '../../middlewares/carupload.js';
 import { authMiddleware } from '../../middlewares/auth.js';
 
 const router = Router();
 const controller = new CarController();
 
-router.get('/cars', authMiddleware, controller.getCars);
-router.get('/cars/:carId', authMiddleware, controller.getCar);
-router.post('/cars', authMiddleware, controller.createCar);
-router.patch('/cars/:carId', authMiddleware, controller.updateCar);
-router.delete('/cars/:carId', authMiddleware, controller.deleteCar);
+router.get('/cars', authHeader, controller.getCars);
+router.get('/cars/:carId', authHeader, controller.getCar);
+router.post('/cars', authHeader, controller.createCar);
+router.patch('/cars/:carId', authHeader, controller.updateCar);
+router.delete('/cars/:carId', authHeader, controller.deleteCar);
 
-// 대용량 업로드 (/cars/upload) → multer 연동 예정
+router.post(
+  '/cars/upload',
+  authMiddleware,
+  uploadCSV.single('file'),
+  controller.uploadCSV
+);
 
 export default router;
