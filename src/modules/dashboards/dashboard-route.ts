@@ -2,7 +2,7 @@
  * @description 대시보드 라우터 모듈
  * 대시보드 관련 요청을 처리하는 기능을 제공합니다.
  * @author 정현준
- * @date 2025-12-29
+ * @date 2026-01-02
  * @version 1.0
  **/
 import { Router } from 'express';
@@ -11,7 +11,7 @@ import dashboardCtrl from './dashboard-controller.js';
 const router = Router();
 
 // GET / - 모든 대시보드 조회
-router.get('/', dashboardCtrl.getAll);
+router.get('/', dashboardCtrl.getById);
 
 // POST / - 새 대시보ord 생성
 router.post('/', dashboardCtrl.create);
