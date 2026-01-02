@@ -6,23 +6,13 @@
  * @version 1.0
  **/
 import { Router } from 'express';
-import dashboardCtrl from './dashboard-controller.js';
+import { dashboardController } from './customer-controller.js';
+import { requireAuth } from '../../middlewares/auth.js';
+import asyncHandler from '../../errors/async-handler.js';
 
 const router = Router();
 
-// GET / - 모든 대시보드 조회
-router.get('/', dashboardCtrl.getById);
+// 대시보드 조회 통계 라우트
+router.get('/', requireAuth, asyncHandler(dashboardController.getDashboard));
 
-// POST / - 새 대시보ord 생성
-router.post('/', dashboardCtrl.create);
-
-// GET /:id - 특정 대시보드 조회
-router.get('/:id', dashboardCtrl.getById);
-
-// PUT /:id - 대시보드 업데이트
-router.put('/:id', dashboardCtrl.update);
-
-// DELETE /:id - 대시보드 삭제
-router.delete('/:id', dashboardCtrl.delete);
-
-export default router;  
+export default router;

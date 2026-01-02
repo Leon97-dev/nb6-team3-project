@@ -7,65 +7,16 @@
  **/
 
 import { Request, Response } from 'express';
-import asyncHandler from '../../errors/async-handler.js';
 import { dashboardService } from '../dashboards/dashboard-service.js';
 
 export const dashboardController = {
-  create: asyncHandler(async (req: Request, res: Response) => {
-    const { title, content } = req.body;
-    const userId = (req as any).user?.id;
-
-    if (!userId) {
-      return res.status(401).json({ error: 'Unauthorized' });
-    }
-
-    const dashboard = await dashboardService.createService({
-      title,
-      content,
-      userId,
-    });
-
-    res.status(201).json(dashboard);
-  }),
-
-  getById: asyncHandler(async (req: Request, res: Response) => {
-    const id = parseInt(String(req.params.id));
-
-    if (Number.isNaN(id)) {
-      return res.status(400).json({ error: 'Invalid id' });
-    }
-
-    const dashboard = await dashboardService.getService(id);
-    res.json(dashboard);
-  }),
-
-  update: asyncHandler(async (req: Request, res: Response) => {
-    const id = parseInt(String(req.params.id));
-
-    const { title, content } = req.body;
-
-    if (Number.isNaN(id)) {
-      return res.status(400).json({ error: 'Invalid id' });
-    }
-
-    const dashboard = await dashboardService.updateService(id, {
-      title,
-      content,
-    });
-
-    res.json(dashboard);
-  }),
-
-  delete: asyncHandler(async (req: Request, res: Response) => {
-    const id = parseInt(String(req.params.id));
-
-    if (Number.isNaN(id)) {
-      return res.status(400).json({ error: 'Invalid id' });
-    }
-
-    await dashboardService.deleteService(id);
-    res.sendStatus(204);
-  }),
+  // 대시보드 통계조회
+  async getDashboard(req: Request, res: Response) {
+    // companyId 추출
+    const companyId = req.user!.companyId;
+    // result 변수에 통계 데이터 할당
+    const result = await dashboardService.getDashboardStats(companyId);
+    // 응답 반환
+    res.status(200).json(result);
+  },
 };
-
-export default dashboardController;
