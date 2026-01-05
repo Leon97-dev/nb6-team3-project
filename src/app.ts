@@ -23,6 +23,7 @@ import authRoutes from './modules/auth/auth-route.js';
 import userRoutes from './modules/users/user-route.js';
 import uploadRoutes from './modules/uploads/upload-route.js';
 import dashboardRoutes from './modules/dashboards/dashboard-route.js';
+import companyRoutes from './modules/companies/company-route.js';
 
 // ============================================
 // 환경 변수 설정
@@ -51,6 +52,7 @@ app.use('/auth', authRoutes);
 app.use('/users', userRoutes);
 app.use('/uploads', uploadRoutes);
 app.use('/dashboards', dashboardRoutes);
+app.use('/companies', companyRoutes);
 
 // ============================================
 // 404 핸들러 등록
