@@ -157,3 +157,4 @@ dist
 temp/
 
 /src/generated/prisma
+package-lock.json
