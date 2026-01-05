@@ -1,13 +1,18 @@
-// src/cars/car-controller.ts
 import type { Request, Response } from 'express';
-import { carService } from './car-service.js';
-import { validateCreateCar } from './car-validator.js';
+import { CarService } from './car-service.js';
+import { parseCarCsv } from '../cars/car-csv.js';
 
-export async function getCars(req: Request, res: Response) {
-  const cars = await carService.getCars(req.user!.companyId);
+export class CarController {
+  static async list(req: Request, res: Response) {
+    const result = await CarService.findList(req.user!.companyId, req.query);
+    res.json(result);
+  }
 
-  res.json({
-    data: cars.map((car) => ({
+  static async detail(req: Request, res: Response) {
+    const carId = Number(req.params.carId);
+    const car = await CarService.findOne(req.user!.companyId, carId);
+
+    res.json({
       id: car.id,
       carNumber: car.carNumber,
       manufacturer: car.carModel.manufacturer,
@@ -20,58 +25,34 @@ export async function getCars(req: Request, res: Response) {
       explanation: car.explanation,
       accidentDetails: car.accidentDetails,
       status: car.status,
-    })),
-  });
-}
+    });
+  }
 
-export async function getCarDetail(req: Request, res: Response) {
-  const carId = Number(req.params.carId);
-  const car = await carService.getCarDetail(carId, req.user!.companyId);
+  static async create(req: Request, res: Response) {
+    const car = await CarService.create(req.user!.companyId, req.body);
+    res.status(201).json(car);
+  }
 
-  res.json({
-    id: car.id,
-    carNumber: car.carNumber,
-    manufacturer: car.carModel.manufacturer,
-    model: car.carModel.model,
-    type: car.carModel.type,
-    manufacturingYear: car.manufacturingYear,
-    mileage: car.mileage,
-    price: car.price,
-    accidentCount: car.accidentCount,
-    explanation: car.explanation,
-    accidentDetails: car.accidentDetails,
-    status: car.status,
-  });
-}
+  static async upload(req: Request, res: Response) {
+    const file = req.file!;
+    const cars = await parseCarCsv(file.path);
 
-export async function createCar(req: Request, res: Response) {
-  const input = validateCreateCar(req.body);
+    for (const car of cars) {
+      await CarService.create(req.user!.companyId, car);
+    }
 
-  const car = await carService.createCar({
-    ...input,
-    companyId: req.user!.companyId,
-  });
+    res.json({ message: '성공적으로 등록되었습니다' });
+  }
 
-  res.status(201).json({
-    id: car.id,
-    carNumber: car.carNumber,
-    manufacturer: car.carModel.manufacturer,
-    model: car.carModel.model,
-    type: car.carModel.type,
-    manufacturingYear: car.manufacturingYear,
-    mileage: car.mileage,
-    price: car.price,
-    accidentCount: car.accidentCount,
-    explanation: car.explanation,
-    accidentDetails: car.accidentDetails,
-    status: car.status,
-  });
-}
+  static async update(req: Request, res: Response) {
+    const carId = Number(req.params.carId);
+    const car = await CarService.update(req.user!.companyId, carId, req.body);
+    res.json(car);
+  }
 
-export async function deleteCar(req: Request, res: Response) {
-  const carId = Number(req.params.carId);
-
-  await carService.deleteCar(carId, req.user!.companyId);
-
-  res.json({ message: '차량 삭제 성공' });
+  static async delete(req: Request, res: Response) {
+    const carId = Number(req.params.carId);
+    await CarService.delete(req.user!.companyId, carId);
+    res.json({ message: '차량 삭제 성공' });
+  }
 }
