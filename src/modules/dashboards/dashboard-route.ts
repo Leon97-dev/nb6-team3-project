@@ -6,7 +6,7 @@
  * @version 1.0
  **/
 import { Router } from 'express';
-import { dashboardController } from './customer-controller.js';
+import { dashboardController } from './dashboard-controller.js';
 import { requireAuth } from '../../middlewares/auth.js';
 import asyncHandler from '../../errors/async-handler.js';
 

@@ -24,7 +24,7 @@ import userRoutes from './modules/users/user-route.js';
 import uploadRoutes from './modules/uploads/upload-route.js';
 import dashboardRoutes from './modules/dashboards/dashboard-route.js';
 import companyRoutes from './modules/companies/company-route.js';
-
+import carRoutes from './modules/cars/car-route.js';
 // ============================================
 // 환경 변수 설정
 // ============================================
@@ -53,7 +53,7 @@ app.use('/users', userRoutes);
 app.use('/uploads', uploadRoutes);
 app.use('/dashboards', dashboardRoutes);
 app.use('/companies', companyRoutes);
-
+app.use('/cars', carRoutes);
 // ============================================
 // 404 핸들러 등록
 // ============================================
