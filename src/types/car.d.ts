@@ -21,8 +21,8 @@ export interface CreateCarDto {
   mileage: number;
   price: number;
   accidentCount: number;
-  explanation?: string;
-  accidentDetails?: string;
+  explanation?: string | null;
+  accidentDetails?: string | null;
 }
 
 // 차량 수정을 위한 데이터 타입
