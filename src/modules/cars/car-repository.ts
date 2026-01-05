@@ -1,67 +1,86 @@
-import prisma from '@prisma/client';
-import { CarStatus } from '@prisma/client';
+// src/cars/car-repository.ts
+import prisma from '../../configs/prisma.js';
 
-export class CarRepository {
-  async findCars(params: {
-    companyId: number;
-    skip: number;
-    take: number;
-    status?: CarStatus;
-    searchBy?: 'carNumber' | 'model';
-    keyword?: string;
-  }) {
-    const { companyId, skip, take, status, searchBy, keyword } = params;
+export const carRepository = {
+  findCars,
+  findCarById,
+  createCar,
+  deleteCar,
+};
 
-    return prisma.car.findMany({
-      where: {
+async function findCars(companyId: number) {
+  return prisma.car.findMany({
+    where: { companyId },
+    include: {
+      carModel: true,
+    },
+    orderBy: { createdAt: 'desc' },
+  });
+}
+
+async function findCarById(carId: number, companyId: number) {
+  return prisma.car.findFirst({
+    where: {
+      id: carId,
+      companyId,
+    },
+    include: {
+      carModel: true,
+    },
+  });
+}
+
+async function createCar(data: {
+  companyId: number;
+  carNumber: string;
+  manufacturingYear: number;
+  mileage: number;
+  price: number;
+  accidentCount: number;
+  explanation?: string;
+  accidentDetails?: string;
+  manufacturer: string;
+  model: string;
+}) {
+  return prisma.car.create({
+    data: {
+      carNumber: data.carNumber,
+      manufacturingYear: data.manufacturingYear,
+      mileage: data.mileage,
+      price: data.price,
+      accidentCount: data.accidentCount,
+      explanation: data.explanation,
+      accidentDetails: data.accidentDetails,
+      companyId: data.companyId,
+      carModel: {
+        connectOrCreate: {
+          where: {
+            manufacturer_model: {
+              manufacturer: data.manufacturer,
+              model: data.model,
+            },
+          },
+          create: {
+            manufacturer: data.manufacturer,
+            model: data.model,
+            type: 'MID_SIZE',
+          },
+        },
+      },
+    },
+    include: {
+      carModel: true,
+    },
+  });
+}
+
+async function deleteCar(carId: number, companyId: number) {
+  return prisma.car.delete({
+    where: {
+      id_companyId: {
+        id: carId,
         companyId,
-        status,
-        ...(keyword && searchBy === 'carNumber'
-          ? { carNumber: { contains: keyword } }
-          : {}),
-        ...(keyword && searchBy === 'model'
-          ? { carModel: { model: { contains: keyword } } }
-          : {}),
       },
-      include: {
-        carModel: true,
-      },
-      skip,
-      take,
-    });
-  }
-
-  async countCars(companyId: number) {
-    return prisma.car.count({ where: { companyId } });
-  }
-
-  async findCarById(companyId: number, carId: number) {
-    return prisma.car.findFirst({
-      where: { id: carId, companyId },
-      include: { carModel: true },
-    });
-  }
-
-  async createCar(data: any) {
-    return prisma.car.create({ data });
-  }
-
-  async updateCar(carId: number, data: any) {
-    return prisma.car.update({
-      where: { id: carId },
-      data,
-    });
-  }
-
-  async deleteCar(carId: number) {
-    return prisma.car.delete({ where: { id: carId } });
-  }
-
-  async findOrCreateCarModel(manufacturer: string, model: string, type: any) {
-    return prisma.carModel.upsert({
-      where: { manufacturer_model: { manufacturer, model } },
-      update: {},
-      create: { manufacturer, model, type },
-    });
-  }
+    },
+  });
 }
