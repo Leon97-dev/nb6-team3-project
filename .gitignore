@@ -159,4 +159,8 @@ temp/
 /src/generated/prisma
 
 
-package-lock.json
+/package-lock.json
+/
+/_pdf
+/_project
+/.vscode
