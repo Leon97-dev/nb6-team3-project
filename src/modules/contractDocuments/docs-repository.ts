@@ -40,7 +40,6 @@ class DocsRepository {
         return { totalItemCount, contracts };
     }
     async GetDraftList() {
-
         const userdata = await prisma.contract.findMany({
             where: {
                 status: "CONTRACT_SUCCESSFUL",
@@ -50,6 +49,7 @@ class DocsRepository {
                 contractName: true,
             }
         });
+        return userdata;
     }
     async UpLoad() {
     }

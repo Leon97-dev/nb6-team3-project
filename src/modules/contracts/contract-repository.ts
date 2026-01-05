@@ -110,6 +110,26 @@ class ContractRepository {
         });
         return companyId;
     };
+    async findCarInfoByCarId(carId: number) {
+        const companyId = await prisma.car.findFirst({
+            where: {
+                id: carId,
+            }, select: {
+                model: true,
+            }
+        });
+        return companyId;
+    };
+    async findCustomerInfoByCustomerId(customerId: number) {
+        const companyId = await prisma.customer.findFirst({
+            where: {
+                id: customerId,
+            }, select: {
+                name: true,
+            }
+        });
+        return companyId;
+    };
     async patchContract(id: number, data: Prisma.ContractUpdateInput) {
         return await prisma.contract.update({
             where: {
