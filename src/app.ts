@@ -18,6 +18,7 @@ import { debugLog } from './errors/debug.js';
 // 라우터 import (여기에 추가 하세요!)
 // ============================================
 import healthRoutes from './modules/common/health-route.js';
+import customerRoutes from './modules/customers/customer-route.js';
 
 // ============================================
 // 환경 변수 설정
@@ -41,6 +42,7 @@ app.use('/upload', express.static('public/uploads'));
 // 라우터 등록 (여기에 추가 하세요!)
 // ============================================
 app.use('/health', healthRoutes);
+app.use('/customers', customerRoutes);
 
 // ============================================
 // 404 핸들러 등록
