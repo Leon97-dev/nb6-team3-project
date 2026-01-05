@@ -12,24 +12,24 @@ class DocsService {
             }
         }
 
-        // const { totalItemCount, contracts } = await docsRepository.GetAllList(where, page, pageSize);
-        // const totalPages = Math.ceil(totalItemCount / pageSize);
+        const { totalItemCount, contracts } = await docsRepository.GetAllList(where, page, pageSize);
+        const totalPages = Math.ceil(totalItemCount / pageSize);
 
-        // const data = contracts.map((contract) => ({
-        //     id: contract.id,
-        //     resolutionDate: contract.resolutionDate,
-        //     documentCount: contract.documents.length,
-        //     userName: contract.user?.name ?? "",
-        //     carNumber: contract.car?.carNumber ?? "",
-        //     documents: contract.documents,
-        // }));
+        const data = contracts.map((contract) => ({
+            id: contract.id,
+            resolutionDate: contract.resolutionDate,
+            documentCount: contract.documents.length,
+            userName: contract.user?.name ?? "",
+            carNumber: contract.car?.carNumber ?? "",
+            documents: contract.documents,
+        }));
 
-        // return {
-        //     currentPage: page,
-        //     totalPages,
-        //     totalItemCount,
-        //     data,
-        // };
+        return {
+            currentPage: page,
+            totalPages,
+            totalItemCount,
+            data,
+        };
     }
 
 
