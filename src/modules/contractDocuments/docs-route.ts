@@ -1,9 +1,10 @@
 import express from 'express';
 import asyncHandler from '../../errors/async-handler.js';
+import { contractDocsController } from './docs-controller.js';
 
 const contractDocsRouter = express.Router();
 
-// contractDocsRouter.get('/', asyncHandler());
-// contractDocsRouter.get('/draft', asyncHandler());
-// contractDocsRouter.post('/upload', asyncHandler());
-// contractDocsRouter.get('/:id/download', asyncHandler());
+contractDocsRouter.get('/', asyncHandler(contractDocsController.GetList));
+contractDocsRouter.get('/draft', asyncHandler(contractDocsController.GetDraft));
+contractDocsRouter.post('/upload', asyncHandler(contractDocsController.UpLoad));
+contractDocsRouter.get('/:id/download', asyncHandler(contractDocsController.DownLoad));

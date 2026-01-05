@@ -17,6 +17,7 @@ class DocsService {
 
         const data = contracts.map((contract) => ({
             id: contract.id,
+            contractName: contract.contractName,
             resolutionDate: contract.resolutionDate,
             documentCount: contract.documents.length,
             userName: contract.user?.name ?? "",
@@ -31,7 +32,9 @@ class DocsService {
             data,
         };
     }
+    async GetDraftList() {
 
+    }
 
 }
 

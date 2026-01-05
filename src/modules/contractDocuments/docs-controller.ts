@@ -21,6 +21,15 @@ class ContractDocsController {
         const docsList = await docsService.findAll(page, pageSize, searchBy, keyword);
         return res.status(200).json(docsList);
     };
+    GetDraft: RequestHandler = async (req, res, next) => {
+        const draftList = await docsService.GetDraftList();
+        return res.status(200).json(draftList);
+    };
+    UpLoad: RequestHandler = async (req, res, next) => {
+    };
+    DownLoad: RequestHandler = async (req, res, next) => {
+    };
+
 
 }
 
