@@ -41,7 +41,8 @@
     "multer": "^2.0.2",
     "superstruct": "^2.0.2",
     "uuid": "^13.0.0",
-    "winston": "^3.19.0"
+    "winston": "^3.19.0",
+    "zod": "^4.1.13"
   },
   "devDependencies": {
     "@types/bcrypt": "^6.0.0",
