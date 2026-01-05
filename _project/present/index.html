@@ -1,0 +1,513 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <title>Legend</title>
+    <link rel="stylesheet" href="leon.css" />
+  </head>
+  <body>
+    <div class="title-block">
+      <h1>🚗 DEAR CARMATE</h1>
+      <p class="subtitle">B2B 중고차 영업 관리</p>
+      <p class="footnote">NB6기 3팀 프로젝트 중간 발표</p>
+    </div>
+    <ul class="hero-list">
+      <li>
+        <a href="#" id="openOverlay">
+          <i class="fa" aria-hidden="true">🔴</i>
+          <strong>개요 및 목표</strong>
+        </a>
+      </li>
+      <li>
+        <a href="#" id="openTeam">
+          <i class="fa" aria-hidden="true">🟠</i>
+          <strong>팀 구성 및 역할</strong>
+        </a>
+      </li>
+      <li>
+        <a href="#" id="openEnv">
+          <i class="fa" aria-hidden="true">🟡</i>
+          <strong>개발 환경</strong>
+        </a>
+      </li>
+      <li>
+        <a href="#" id="openStyle">
+          <i class="fa" aria-hidden="true">🟢</i>
+          <strong>프로젝트 스타일</strong>
+        </a>
+      </li>
+      <li>
+        <a href="#" id="openIssue">
+          <i class="fa" aria-hidden="true">🔵</i>
+          <strong>개발 이슈</strong>
+        </a>
+      </li>
+      <li>
+        <a href="#" id="openPlan">
+          <i class="fa" aria-hidden="true">🟣</i>
+          <strong>향후 계획</strong>
+        </a>
+      </li>
+    </ul>
+    <div class="overlay" id="overlay">
+      <div class="overlay-content">
+        <header class="overlay-header">
+          <div class="header-inner">
+            <h2><span class="bar"></span>🚙 프로젝트 개요 및 목표</h2>
+            <button class="back-home" id="backHome">← 메인으로</button>
+          </div>
+        </header>
+        <main class="overview-grid">
+          <article class="overview-card">
+            <div class="card-icon">🎯</div>
+            <h3>개발 목표</h3>
+            <p>
+              기업별 영업 데이터를 한 곳에서 관리하고, 계약 진행 상황을
+              실시간으로 파악할 수 있는 B2B 중고차 영업 플랫폼 구축.
+            </p>
+          </article>
+          <article class="overview-card">
+            <div class="card-icon">📅</div>
+            <h3>개발 기간 및 팀</h3>
+            <p><strong>기간:</strong> 2주 (백엔드 API 개발)</p>
+            <p><strong>팀:</strong> 총 6명</p>
+          </article>
+          <article class="overview-card">
+            <div class="card-icon">⭐</div>
+            <h3>핵심 기능</h3>
+            <ul>
+              <li>회사,유저,차량,고객,계약,계약서 CRUD</li>
+              <li>칸반 보드 계약 상태 관리 (드래그앤드랍)</li>
+              <li>CSV 대용량 업로드</li>
+              <li>JWT 인증 및 관리자 권한</li>
+            </ul>
+          </article>
+        </main>
+      </div>
+    </div>
+    <div class="overlay" id="overlayTeam">
+      <div class="overlay-content">
+        <header class="overlay-header">
+          <div class="header-inner">
+            <h2><span class="bar"></span>🚙 팀 구성 및 역할 분담</h2>
+            <button class="back-home" id="backTeam">← 메인으로</button>
+          </div>
+        </header>
+        <main class="overview-grid two-cols">
+          <article class="overview-card">
+            <h3 style="color: #e53935">팀 역할 구조</h3>
+            <ul>
+              <li><strong>정현준(팀장):</strong> 파일 업로드 / 대시보드</li>
+              <li><strong>유인학:</strong> 계약 / 계약서</li>
+              <li><strong>박대용:</strong> 회사 / 고객</li>
+              <li><strong>오예슬:</strong> 차량 / 문서화</li>
+              <li><strong>이호성:</strong> 인증 / 유저</li>
+            </ul>
+          </article>
+          <article class="overview-card">
+            <h3 style="color: #e53935">협업 방식</h3>
+            <ul>
+              <li>API 엔드포인트 단위 작업 분배</li>
+              <li>Git 브랜치 전략 (main → feature)</li>
+              <li>PR(Pull Request) 기반 워크플로우</li>
+              <li>토론을 통한 코드 리뷰</li>
+            </ul>
+          </article>
+        </main>
+        <button class="pager-btn" id="teamNext">→</button>
+      </div>
+    </div>
+    <div class="overlay" id="overlayEnv">
+      <div class="overlay-content">
+        <header class="overlay-header">
+          <div class="header-inner">
+            <h2><span class="bar"></span>🚙 개발 환경 & 기술 스택</h2>
+            <button class="back-home" id="backEnv">← 메인으로</button>
+          </div>
+        </header>
+        <main class="env-layout">
+          <section class="env-text">
+            <h3>Backend</h3>
+            <ul>
+              <li>Node.js + Express 아키텍처</li>
+              <li>Prisma ORM + PostgreSQL 데이터베이스</li>
+              <li>Multer 기반 파일 업로드(이미지/문서)</li>
+            </ul>
+            <h3>DevOps & Tools</h3>
+            <ul>
+              <li>GitHub 브랜치 기반 협업 & PR 토론</li>
+              <li>Prettier 코드 포매팅 규칙</li>
+              <li>Render 배포 예정</li>
+            </ul>
+            <h3>개발 원칙</h3>
+            <ul>
+              <li>RESTful API 설계 및 단일 책임 원칙 준수</li>
+              <li>환경별 독립 설정</li>
+              <li>모델·스키마 중심 설계와 문서화 우선</li>
+            </ul>
+          </section>
+          <section class="env-visual">
+            <img
+              src="images/git1.png"
+              alt="기술 스택 다이어그램"
+              class="zoomable"
+            />
+          </section>
+        </main>
+      </div>
+    </div>
+    <div class="overlay" id="overlayStyle">
+      <div class="overlay-content">
+        <header class="overlay-header">
+          <div class="header-inner">
+            <h2><span class="bar"></span>🚙 프로젝트 설정 & 표준화</h2>
+            <button class="back-home" id="backStyle">← 메인으로</button>
+          </div>
+        </header>
+        <main class="env-layout">
+          <section class="env-text">
+            <h3>표준화된 설정</h3>
+            <ul>
+              <li>.prettierrc / dev-guide.md로 규칙 단일화</li>
+              <li>.env.example 템플릿으로 환경 변수 스키마 고정</li>
+              <li>Git flow(브랜치/PR) 가이드 문서 포함</li>
+            </ul>
+            <h3>코드 컨벤션</h3>
+            <ul>
+              <li>파일명: kebab-case (routes/controllers 등)</li>
+              <li>함수명: camelCase</li>
+              <li>
+                컨트롤러: 객체 리터럴(`export const foo = { ... }`)로 핸들러
+                묶음
+              </li>
+              <li>비동기 처리: async/await 일관 사용</li>
+            </ul>
+            <h3>문서화</h3>
+            <ul>
+              <li>API 명세서: REST Client 컬렉션</li>
+              <li>개발 가이드: Markdown 가이드</li>
+            </ul>
+          </section>
+          <section class="env-visual">
+            <img
+              src="images/code1.png"
+              alt="프로젝트 설정 화면"
+              class="zoomable large-code"
+            />
+          </section>
+        </main>
+      </div>
+    </div>
+    <div class="overlay" id="overlayIssue">
+      <div class="overlay-content">
+        <header class="overlay-header">
+          <div class="header-inner">
+            <h2><span class="bar"></span>🚙 구현 과정 이슈</h2>
+            <button class="back-home" id="backIssue">← 메인으로</button>
+          </div>
+        </header>
+        <main class="issue-layout">
+          <section class="issue-card">
+            <h3>발견된 문제</h3>
+            <ul>
+              <li>관리자 생성 기능 부재 → 시드/DB 수정으로 isAdmin 설정 필요</li>
+              <li>관리자가 타사 유저 삭제 가능 → FK Restrict로 오남용 방지(계약 존재 시 삭제 불가)</li>
+              <li>차량 모델 중복 가능 → `@@unique([manufacturer, model])` 제약 필요</li>
+              <li>파일 업로드 다중 확장자 허용 시 검증·스토리지 정책 일관성 요구</li>
+            </ul>
+            <h3>해결/대응</h3>
+            <ul>
+              <li>관리자: 시드 스크립트와 DB 플래그 관리로 임시 대응, 굳이 Admin CRUD 필요 없을 것 같음</li>
+              <li>유저 삭제: 계약 FK Restrict 적용, 회사ID 비교 로직 추가 예정</li>
+              <li>차량 모델: 제조사+모델 unique 스키마 제안, 중복 허용 시 타입 매핑 별도 정의 필요</li>
+              <li>업로드: MIME/확장자 화이트리스트, 서명 URL 만료, 최대 용량 제한 적용</li>
+            </ul>
+            <h3>영향</h3>
+            <ul>
+              <li>역할/권한 미비 시 운영 리스크 증가 → Admin 관리 API 필요</li>
+              <li>데이터 무결성(회사/계약/차량) 유지가 핵심 → 스키마 제약과 검증 로직 강화</li>
+              <li>파일 업로드 정책 미흡 시 보안·스토리지 비용 증가 → 일관된 검증/만료 필수</li>
+            </ul>
+          </section>
+        </main>
+      </div>
+    </div>
+    <div class="overlay" id="overlayPlan">
+      <div class="overlay-content">
+        <header class="overlay-header">
+          <div class="header-inner">
+            <h2><span class="bar"></span>🚙 향후 계획 (이번 주 목표)</h2>
+            <button class="back-home" id="backPlan">← 메인으로</button>
+          </div>
+        </header>
+        <main class="plan-layout">
+          <div class="plan-timeline">
+            <div class="plan-steps">
+              <div class="plan-step">
+                <div class="plan-dot">1</div>
+                <h3>통합</h3>
+                <p>REST Client 통합 테스트</p>
+                <p>연계 기능 개발</p>
+              </div>
+              <div class="plan-step">
+                <div class="plan-dot">2</div>
+                <h3>연동</h3>
+                <p>프론트엔드 연동</p>
+                <p>CORS 및 환경변수</p>
+              </div>
+              <div class="plan-step">
+                <div class="plan-dot">3</div>
+                <h3>배포</h3>
+                <p>Render 통합 배포</p>
+                <p>DB 및 경로 검증</p>
+              </div>
+              <div class="plan-step">
+                <div class="plan-dot">4</div>
+                <h3>발표</h3>
+                <p>시연 시나리오</p>
+                <p>발표 자료 보완</p>
+              </div>
+            </div>
+            <div class="plan-line"></div>
+          </div>
+        </main>
+      </div>
+    </div>
+    <!-- 역할 상세 오버레이 -->
+    <div class="overlay" id="overlayRole">
+      <div class="overlay-content">
+        <header class="overlay-header">
+          <div class="header-inner">
+            <h2><span class="bar"></span>🚙 주요 역할 상세</h2>
+            <button class="back-home" id="backRole">← 이전으로</button>
+          </div>
+        </header>
+        <main class="role-detail">
+          <div class="role-text">
+            <h3 id="roleTitle">정현준</h3>
+            <ul id="roleTasks"></ul>
+          </div>
+          <div class="role-image" id="roleImages">
+            <img src="images/dashboad1.png" alt="대시보드 이미지" />
+            <img
+              src="images/upload1.png"
+              alt="업로드 관련 이미지"
+              class="secondary-image"
+            />
+          </div>
+        </main>
+        <button class="pager-btn" id="roleNext">→</button>
+      </div>
+    </div>
+    <script>
+      const openBtn = document.getElementById('openOverlay');
+      const openTeam = document.getElementById('openTeam');
+      const openEnv = document.getElementById('openEnv');
+      const openStyle = document.getElementById('openStyle');
+      const openIssue = document.getElementById('openIssue');
+      const openPlan = document.getElementById('openPlan');
+      const overlay = document.getElementById('overlay');
+      const overlayTeam = document.getElementById('overlayTeam');
+      const overlayEnv = document.getElementById('overlayEnv');
+      const overlayStyle = document.getElementById('overlayStyle');
+      const overlayIssue = document.getElementById('overlayIssue');
+      const overlayPlan = document.getElementById('overlayPlan');
+      const overlayRole = document.getElementById('overlayRole');
+      const backHome = document.getElementById('backHome');
+      const backTeam = document.getElementById('backTeam');
+      const backEnv = document.getElementById('backEnv');
+      const backStyle = document.getElementById('backStyle');
+      const backIssue = document.getElementById('backIssue');
+      const backPlan = document.getElementById('backPlan');
+      const backRole = document.getElementById('backRole');
+      const teamNext = document.getElementById('teamNext');
+      const roleNext = document.getElementById('roleNext');
+      const roleTitle = document.getElementById('roleTitle');
+      const roleTasks = document.getElementById('roleTasks');
+      const roleImages = document.getElementById('roleImages');
+      const imgModal = document.getElementById('imgModal');
+      const modalImg = document.getElementById('modalImg');
+      const modalClose = document.getElementById('modalClose');
+
+      const rolePages = [
+        {
+          title: '주요 역할 상세 내용: 정현준',
+          tasks: [
+            '이미지·PDF·CSV 등 다중 확장자 업로드 API 설계(검증, 스토리지, 서명 URL, 만료 정책)',
+            '업로드 데이터 기반 영업/계약 KPI 집계를 위한 대시보드 API 및 지표 스키마 설계',
+            '대용량 업로드 처리량/재시도/에러 모니터링 백엔드 파이프라인 고도화',
+          ],
+          images: ['images/dashboad1.png', 'images/upload1.png'],
+        },
+        {
+          title: '주요 역할 상세 내용: 유인학',
+          tasks: [
+            '상담 → 견적 → 계약 → 서명 단계별 계약 상태 머신과 API 계약 정의',
+            '계약서 템플릿/버전 관리, PDF 생성·다운로드 엔드포인트 설계',
+            '계약 상태 변경 알림·필터·정렬 API로 진행 상황 가시성 확보',
+          ],
+          images: ['images/contract1.png', 'images/contract2.png'],
+        },
+        {
+          title: '주요 역할 상세 내용: 박대용',
+          tasks: [
+            '회사·고객 도메인 스키마 재정의 및 CRUD API 밸리데이션 규칙 확립',
+            '고객 검색/태그/다중 필터 API 설계로 영업 리스트업 성능 개선',
+            '중복 고객 판별 로직과 고객 활동 히스토리 조회 엔드포인트 추가',
+          ],
+          images: ['images/company1.png'],
+        },
+        {
+          title: '주요 역할 상세 내용: 오예슬',
+          tasks: [
+            '차량 등록/수정/삭제·상세 조회 API 고도화 (옵션, 가격, 이력 스키마 포함)',
+            '차량 도메인 모델 설계·API 문서화 및 테스트 케이스 정리',
+            '차량 이미지·서류 업로드/검증 엔드포인트와 스토리지 정책 설계',
+          ],
+          images: ['images/car1.png'],
+        },
+        {
+          title: '주요 역할 상세 내용: 이호성',
+          tasks: [
+            'JWT 인증 흐름 재정비(발급/갱신/만료)와 토큰 검증 미들웨어 강화',
+            '역할/권한(RBAC) 모델 설계로 관리자·영업사원별 접근 제어 API 구현',
+            '비밀번호 정책, 감사 로그, 차단/레이트리밋 등 보안 기능 개선 고민중',
+          ],
+          images: ['images/user1.png'],
+        },
+      ];
+      let roleIndex = 0;
+
+      function renderRolePage() {
+        const page = rolePages[roleIndex];
+        if (!page) return;
+        roleTitle.textContent = page.title;
+        roleTasks.innerHTML = page.tasks.map((t) => `<li>${t}</li>`).join('');
+        if (roleImages) {
+          roleImages.innerHTML = page.images
+            .map(
+              (src, idx) =>
+                `<img src="${src}" alt="역할 관련 이미지" class="zoomable ${idx > 0 ? 'secondary-image' : ''}" />`
+            )
+            .join('');
+        }
+      }
+
+      openBtn?.addEventListener('click', (e) => {
+        e.preventDefault();
+        overlay?.classList.add('show');
+      });
+
+      openTeam?.addEventListener('click', (e) => {
+        e.preventDefault();
+        overlayTeam?.classList.add('show');
+      });
+
+      openEnv?.addEventListener('click', (e) => {
+        e.preventDefault();
+        overlayEnv?.classList.add('show');
+      });
+
+      openStyle?.addEventListener('click', (e) => {
+        e.preventDefault();
+        overlayStyle?.classList.add('show');
+      });
+
+      openIssue?.addEventListener('click', (e) => {
+        e.preventDefault();
+        overlayIssue?.classList.add('show');
+      });
+
+      openPlan?.addEventListener('click', (e) => {
+        e.preventDefault();
+        overlayPlan?.classList.add('show');
+      });
+
+      backHome?.addEventListener('click', (e) => {
+        e.preventDefault();
+        overlay?.classList.remove('show');
+      });
+
+      backTeam?.addEventListener('click', (e) => {
+        e.preventDefault();
+        overlayTeam?.classList.remove('show');
+      });
+
+      backEnv?.addEventListener('click', (e) => {
+        e.preventDefault();
+        overlayEnv?.classList.remove('show');
+      });
+
+      backStyle?.addEventListener('click', (e) => {
+        e.preventDefault();
+        overlayStyle?.classList.remove('show');
+      });
+
+      backIssue?.addEventListener('click', (e) => {
+        e.preventDefault();
+        overlayIssue?.classList.remove('show');
+      });
+
+      backPlan?.addEventListener('click', (e) => {
+        e.preventDefault();
+        overlayPlan?.classList.remove('show');
+      });
+
+      teamNext?.addEventListener('click', (e) => {
+        e.preventDefault();
+        roleIndex = 0;
+        renderRolePage();
+        overlayTeam?.classList.remove('show');
+        overlayRole?.classList.add('show');
+      });
+
+      backRole?.addEventListener('click', (e) => {
+        e.preventDefault();
+        overlayRole?.classList.remove('show');
+        overlayTeam?.classList.add('show');
+      });
+
+      roleNext?.addEventListener('click', (e) => {
+        e.preventDefault();
+        roleIndex = (roleIndex + 1) % rolePages.length;
+        renderRolePage();
+      });
+
+      function openModal(src) {
+        if (!imgModal || !modalImg) return;
+        modalImg.src = src;
+        imgModal.classList.add('show');
+      }
+
+      function closeModal() {
+        imgModal?.classList.remove('show');
+        if (modalImg) modalImg.src = '';
+      }
+
+      document.addEventListener('click', (e) => {
+        const target = e.target;
+        if (
+          target instanceof HTMLImageElement &&
+          target.classList.contains('zoomable')
+        ) {
+          openModal(target.src);
+        }
+      });
+
+      modalClose?.addEventListener('click', closeModal);
+      imgModal?.addEventListener('click', (e) => {
+        if (e.target === imgModal) closeModal();
+      });
+
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') closeModal();
+      });
+    </script>
+    <div class="img-modal" id="imgModal">
+      <div class="img-modal-inner">
+        <button class="img-modal-close" id="modalClose">×</button>
+        <img id="modalImg" alt="확대 이미지" />
+      </div>
+    </div>
+  </body>
+</html>
