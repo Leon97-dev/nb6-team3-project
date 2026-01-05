@@ -157,7 +157,8 @@ dist
 temp/
 
 /src/generated/prisma
-package-lock.json
-prisma/migrations/
-prisma/schema.prisma
-prisma/seed.js
+
+
+/package-lock.json
+/.vscode
+/prisma/migrations
