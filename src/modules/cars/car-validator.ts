@@ -1,50 +1,35 @@
-// src/cars/car-validator.ts
-import { ValidationError } from '../../errors/error-handler.js';
+import {
+  ValidationError,
+  NotFoundError,
+  ForbiddenError,
+} from '../../errors/error-handler.js';
+import type { CreateCarDto, UpdateCarDto } from '../../types/car.d.js';
+import { CarRepository } from './car-repository.js';
 
-interface CreateCarInput {
-  carNumber: string;
-  manufacturer: string;
-  model: string;
-  manufacturingYear: number;
-  mileage: number;
-  price: number;
-  accidentCount: number;
-  explanation?: string;
-  accidentDetails?: string;
-}
-
-export function validateCreateCar(body: unknown): CreateCarInput {
-  if (!body || typeof body !== 'object') {
-    throw new ValidationError(null, '요청 데이터가 올바르지 않습니다');
+export class CarValidator {
+  static validateCreate(dto: CreateCarDto) {
+    if (!dto.carNumber) {
+      throw new ValidationError('carNumber', '차량 번호는 필수입니다');
+    }
+    if (!dto.manufacturer || !dto.model) {
+      throw new ValidationError(null, '제조사와 차종은 필수입니다');
+    }
+    if (dto.manufacturingYear < 1900) {
+      throw new ValidationError('manufacturingYear', '제조년도 오류');
+    }
   }
 
-  const data = body as Record<string, unknown>;
-
-  if (
-    typeof data.carNumber !== 'string' ||
-    typeof data.manufacturer !== 'string' ||
-    typeof data.model !== 'string' ||
-    typeof data.manufacturingYear !== 'number' ||
-    typeof data.mileage !== 'number' ||
-    typeof data.price !== 'number' ||
-    typeof data.accidentCount !== 'number'
-  ) {
-    throw new ValidationError(null, '필수 필드가 누락되었습니다');
+  static validateUpdate(dto: UpdateCarDto) {
+    if (dto.manufacturingYear !== undefined && dto.manufacturingYear < 1900) {
+      throw new ValidationError('manufacturingYear', '제조년도 오류');
+    }
   }
 
-  return {
-    carNumber: data.carNumber,
-    manufacturer: data.manufacturer,
-    model: data.model,
-    manufacturingYear: data.manufacturingYear,
-    mileage: data.mileage,
-    price: data.price,
-    accidentCount: data.accidentCount,
-    explanation:
-      typeof data.explanation === 'string' ? data.explanation : undefined,
-    accidentDetails:
-      typeof data.accidentDetails === 'string'
-        ? data.accidentDetails
-        : undefined,
-  };
+  static async validateOwnership(companyId: number, carId: number) {
+    const car = await CarRepository.findById(companyId, carId);
+    if (!car) throw new NotFoundError('존재하지 않는 차량입니다');
+    if (car.companyId !== companyId)
+      throw new ForbiddenError('권한이 없습니다');
+    return car;
+  }
 }
