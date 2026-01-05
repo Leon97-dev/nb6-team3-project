@@ -161,4 +161,4 @@ temp/
 
 /package-lock.json
 /.vscode
-/src/prisma/migrations
+/prisma/migrations
