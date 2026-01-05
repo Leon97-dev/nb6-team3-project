@@ -18,9 +18,14 @@ import { debugLog } from './errors/debug.js';
 // 라우터 import (여기에 추가 하세요!)
 // ============================================
 import healthRoutes from './modules/common/health-route.js';
+<<<<<<< HEAD
 import customerRoutes from './modules/customers/customer-route.js';
 import authRoutes from './modules/auth/auth-route.js';
 import userRoutes from './modules/users/user-route.js';
+=======
+import { imageRouter } from './modules/images/image-route.js';
+import dashboardRouter from './modules/dashboards/dashboard-route.js';
+>>>>>>> 54f7c95
 
 // ============================================
 // 환경 변수 설정
@@ -44,9 +49,14 @@ app.use('/upload', express.static('public/uploads'));
 // 라우터 등록 (여기에 추가 하세요!)
 // ============================================
 app.use('/health', healthRoutes);
+<<<<<<< HEAD
 app.use('/customers', customerRoutes);
 app.use('/auth', authRoutes);
 app.use('/users', userRoutes);
+=======
+app.use('/images', imageRouter);
+app.use('/dashboards', dashboardRouter);
+>>>>>>> 54f7c95
 
 // ============================================
 // 404 핸들러 등록
