@@ -157,13 +157,6 @@ dist
 temp/
 
 /src/generated/prisma
-<<<<<<< HEAD
-package-lock.json
-prisma/migrations/
-=======
-
-
 /package-lock.json
 /.vscode
 /prisma/migrations
->>>>>>> 29526764e66bd71ba2eb92f0916ad09d5aa52060
