@@ -1,9 +1,5 @@
 import prisma from '../../configs/prisma.js';
-import {
-  ConflictError,
-  NotFoundError,
-  ValidationError,
-} from '../../errors/error-handler.js';
+import { NotFoundError } from '../../errors/error-handler.js';
 import type {
   CreateCarDto,
   UpdateCarDto,
@@ -39,8 +35,12 @@ export class CarService {
         mileage: dto.mileage,
         price: dto.price,
         accidentCount: dto.accidentCount,
-        explanation: dto.explanation,
-        accidentDetails: dto.accidentDetails,
+        ...(dto.explanation !== undefined && {
+          explanation: dto.explanation,
+        }),
+        ...(dto.accidentDetails !== undefined && {
+          accidentDetails: dto.accidentDetails,
+        }),
         companyId,
         carModelId: carModel.id,
       },
