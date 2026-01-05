@@ -19,12 +19,14 @@ export const dashboardService = {
     if (!companyId) {
       throw new ValidationError('잘못된 요청입니다');
     }
+
     const now = new Date();
     const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
     const lastMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
     const lastMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0);
     const successfulStatus = ContractStatus.CONTRACT_SUCCESSFUL;
 
+    // 1. 이번 달 매출과 전체 계약 건수
     const monthlySalesData = await prisma.contract.aggregate({
       where: {
         companyId,
@@ -33,7 +35,7 @@ export const dashboardService = {
       },
       _sum: { contractPrice: true },
     });
-
+    // 2. 지난 달 매출 및 계약 건수
     const lastMonthSalesData = await prisma.contract.aggregate({
       where: {
         companyId,
