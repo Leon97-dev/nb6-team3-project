@@ -39,7 +39,22 @@ class DocsRepository {
         ]);
         return { totalItemCount, contracts };
     }
+    async GetDraftList() {
 
+        const userdata = await prisma.contract.findMany({
+            where: {
+                status: "CONTRACT_SUCCESSFUL",
+            },
+            select: {
+                id: true,
+                contractName: true,
+            }
+        });
+    }
+    async UpLoad() {
+    }
+    async DownLoad() {
+    }
 }
 const docsRepository = new DocsRepository();
 export default docsRepository;

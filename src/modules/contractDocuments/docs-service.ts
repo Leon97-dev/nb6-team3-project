@@ -1,5 +1,7 @@
 import { Prisma } from '@prisma/client';
 import docsRepository from './docs-repository.js';
+import prisma from '../../configs/prisma.js';
+import { contractService } from '../contracts/contract-service.js';
 
 class DocsService {
     async findAll(page: number = 1, pageSize: number = 10, searchBy: string = "", keyword: string = "") {
@@ -33,7 +35,12 @@ class DocsService {
         };
     }
     async GetDraftList() {
-
+        const userlist = await docsRepository.GetDraftList();
+        const data = userlist.map((user) => ({
+            id: user.id,
+            data: user.contractName,
+        }));
+        return data;
     }
 
 }
