@@ -1,0 +1,7 @@
+// upload test file
+POST http://localhost:3000/uploads
+Content-Type: multipart/form-data
+
+
+
+    
