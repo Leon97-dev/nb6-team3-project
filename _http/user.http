@@ -1,0 +1,45 @@
+### 환경 설정
+@base = http://localhost:3007
+@accessToken = 
+@refreshToken = 
+
+### 회원가입
+POST {{base}}/users
+Content-Type: application/json
+
+{
+  "name": "김레온",
+  "email": "leon@test.com",
+  "employeeNumber": "E1003",
+  "phoneNumber": "010-1234-5678",
+  "password": "user1234",
+  "passwordConfirmation": "user1234",
+  "companyName": "테스트자동차상사",
+  "companyCode": "company001"
+}
+
+### 내 정보 조회
+GET {{base}}/users/me
+Authorization: Bearer {{accessToken}}
+
+### 내 정보 수정
+PATCH {{base}}/users/me
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "employeeNumber": "E1001-1",
+  "phoneNumber": "010-9999-8888",
+  "currentPassword": "user1234",
+  "password": "user1234",
+  "passwordConfirmation": "user1234",
+  "imageUrl": "http://localhost:3007/upload/sample.png"
+}
+
+### 회원 탈퇴
+DELETE {{base}}/users/me
+Authorization: Bearer {{accessToken}}
+
+### (관리자) 유저 삭제
+DELETE {{base}}/users/86
+Authorization: Bearer {{accessToken}}
