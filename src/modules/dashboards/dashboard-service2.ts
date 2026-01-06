@@ -1,3 +1,11 @@
+/**
+ * @description 대시보드 서비스 모듈
+ * 대시보드 관련 비즈니스 로직을 처리하는 기능을 제공합니다.
+ * @author 정현준
+ * @date 2026-01-06
+ * @version 1.0
+ **/
+
 import { CarType, ContractStatus, type Contract } from '@prisma/client';
 import prisma from '../../configs/prisma.js';
 import { ValidationError } from '../../errors/error-handler.js';
@@ -33,7 +41,8 @@ export const dashboardService = {
         },
         _sum: { contractPrice: true },
       }),
-      // 지난달 매출
+
+      // 지난 달 매출
       prisma.contract.aggregate({
         where: {
           companyId,
@@ -42,6 +51,7 @@ export const dashboardService = {
         },
         _sum: { contractPrice: true },
       }),
+
       // 진행 중인 계약
       prisma.contract.count({
         where: {
@@ -55,39 +65,55 @@ export const dashboardService = {
           },
         },
       }),
+
       // 완료된 총 계약
       prisma.contract.count({
         where: { companyId, status: successfulStatus },
       }),
+
       // 차종별 집계 (DB에서 직접 계산)
       prisma.contract.groupBy({
         by: ['carId'], // 실제 관계 구조에 따라 car.carModel.type으로 접근하려면 Join/Include 확인 필요
         where: { companyId },
         _count: { _all: true },
         _sum: { contractPrice: true },
-        // 주의: Prisma groupBy는 중첩 관계(Relation) 그룹화를 직접 지원하지 않을 수 있어
-        // 구조에 따라 raw query나 별도 처리가 필요할 수 있습니다.
       }),
     ]);
+
+    // 주의: Prisma groupBy는 중첩 관계(Relation) 그룹화를 직접 지원하지 않을 수 있어
+    // 구조에 따라 raw query나 별도 처리가 필요할 수 있습니다.
 
     const monthlySales = monthlySalesData._sum.contractPrice || 0;
     const lastMonthSales = lastMonthSalesData._sum.contractPrice || 0;
 
     // 성장률 계산 개선
     let growthRate = 0;
+
     if (lastMonthSales > 0) {
-      growthRate = ((monthlySales - lastMonthSales) / lastMonthSales) * 100;
+      // 1. 기본 성장률 계산
+      const rate = ((monthlySales - lastMonthSales) / lastMonthSales) * 100;
+      // 2. 소수점 둘째 자리 반올림
+      growthRate = Number(rate.toFixed(2));
     } else if (monthlySales > 0) {
+      // 3. 지난 달 매출 0원 -> 이번 달 매출 발생 시
+      // 상황에 따라 100% 표기 적절한지 기획 확인 필요
       growthRate = 100;
+    } else if (lastMonthSales === 0 && monthlySales === 0) {
+      // 4. 둘 다 0원인 경우
+      growthRate = 0;
+    } else {
+      // 5. 예외 (지난 달이 음수였거나 특이 케이스)
+      // 대시보드 성격에 따라 0으로 처리하거나 별도 로직 적용
+      growthRate = 0;
     }
 
+    // ... 집계 데이터 가공 로직
     return {
       monthlySales,
       lastMonthSales,
       growthRate,
       proceedingContractsCount,
       completedContractsCount,
-      // ... 집계 데이터 가공 로직
     };
   },
 };
