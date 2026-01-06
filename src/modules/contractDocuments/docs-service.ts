@@ -1,7 +1,7 @@
 import { Prisma } from '@prisma/client';
 import docsRepository from './docs-repository.js';
 import prisma from '../../configs/prisma.js';
-import { contractService } from '../contracts/contract-service.js';
+import { ValidationError } from '../../errors/error-handler.js';
 
 class DocsService {
     async findAll(page: number = 1, pageSize: number = 10, searchBy: string = "", keyword: string = "") {
@@ -43,6 +43,24 @@ class DocsService {
         return data;
     }
 
+    async upload(file: { originalname: string; path: string; size: number; mimetype: string; }, userId: number) {
+        const { id } = await docsRepository.UpLoad({
+            fileName: file.originalname,
+            fileUrl: file.path,
+            fileSize: file.size,
+            contentType: file.mimetype,
+            uploadedByUserId: userId,
+        });
+        return { contractDocumentId: id };
+    }
+
+    async download(id: number) {
+        const document = await docsRepository.findById(id);
+        if (!document) {
+            throw new ValidationError('파일을 찾을 수 없습니다.');
+        }
+        return document;
+    }
 }
 
 const docsService = new DocsService();

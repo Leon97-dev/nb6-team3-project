@@ -51,9 +51,18 @@ class DocsRepository {
         });
         return userdata;
     }
-    async UpLoad() {
+    async UpLoad(data: Prisma.ContractDocumentUncheckedCreateInput) {
+        return await prisma.contractDocument.create({
+            data,
+            select: {
+                id: true,
+            },
+        });
     }
-    async DownLoad() {
+    async findById(id: number) {
+        return await prisma.contractDocument.findUnique({
+            where: { id },
+        });
     }
 }
 const docsRepository = new DocsRepository();
