@@ -34,15 +34,32 @@ class ContractController {
     patchContract: RequestHandler = async (req, res) => {
         const id = req.params.id;
         if (!id) return new ValidationError("잘못된 요청 입니다.(id)");
+
+        const contractId = parseInt(id);
+        const userId = (req as any).user?.id;
+
+        const isWriter = await contractService.validateWriter(contractId, userId);
+        if (!isWriter) {
+            return res.status(403).json({ message: '담당자만 수정이 가능합니다.' });
+        }
+
         const validatedData = s.create(req.body, PatchContractStruct);
         if (!validatedData) return new ValidationError("잘못된 요청입니다.");
-        const patchedData = await contractService.patchContract(parseInt(id), validatedData);
+        const patchedData = await contractService.patchContract(contractId, validatedData);
         return res.status(200).json(patchedData);
     };
     deleteContract: RequestHandler = async (req, res) => {
         const id = req.params.id;
         if (!id) return new ValidationError("잘못된 요청 입니다.(id)");
-        await contractService.deleteContract(parseInt(id));
+
+        const contractId = parseInt(id);
+        const userId = (req as any).user?.id;
+        const isWriter = await contractService.validateWriter(contractId, userId);
+        if (!isWriter) {
+            return res.status(403).json({ message: '담당자만 삭제가 가능합니다.' });
+        }
+
+        await contractService.deleteContract(contractId);
         return res.status(204).send();
     };
     findCarList: RequestHandler = async (req, res) => {

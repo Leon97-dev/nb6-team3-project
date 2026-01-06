@@ -100,6 +100,17 @@ class ContractRepository {
         });
     };
 
+    async findById(id: number) {
+        return await prisma.contract.findUnique({
+            where: { id },
+            select: {
+                id: true,
+                user: {
+                    select: { id: true }
+                }
+            }
+        });
+    }
     async findCompanyIdByCarId(carId: number) {
         const companyId = await prisma.car.findFirst({
             where: {

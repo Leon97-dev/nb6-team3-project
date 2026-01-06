@@ -30,6 +30,13 @@ class ContractService {
             })),
         };
     }
+
+    async validateWriter(contractId: number, userId: number) {
+        const contract = await contractRepository.findById(contractId);
+        if (!contract) throw new NotFoundError("존재하지 않는 계약입니다.");
+        return contract.user?.id === userId;
+    }
+
     async findAll(searchBy: string, keyword: string) {
         const where: any = {};
         if (keyword) {
