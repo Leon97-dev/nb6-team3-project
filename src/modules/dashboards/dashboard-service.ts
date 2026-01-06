@@ -2,7 +2,7 @@
  * @description 대시보드 서비스 모듈
  * 대시보드 관련 비즈니스 로직을 처리하는 기능을 제공합니다.
  * @author 정현준
- * @date 2026-01-02
+ * @date 2026-01-06
  * @version 1.0
  **/
 
@@ -106,7 +106,6 @@ export const dashboardService = {
 
       // 2. 차종별 매출액 누적 (성공한 계약만)
       if (Contract.status === successfulStatus) {
-        // (수정) 괄호 닫기 오류 수정 및 Null 병합 연산자(??)로 안전하게 처리
         salesByType[typeLabel] =
           (salesByType[typeLabel] || 0) + (Contract.contractPrice || 0);
       }
