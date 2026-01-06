@@ -30,9 +30,8 @@ export const dashboardService = {
       lastMonthSalesData,
       proceedingContractsCount,
       completedContractsCount,
-      statsByType,
     ] = await Promise.all([
-      // 이번 달 매출
+      // 1-1. 이번 달 매출
       prisma.contract.aggregate({
         where: {
           companyId,
@@ -42,7 +41,7 @@ export const dashboardService = {
         _sum: { contractPrice: true },
       }),
 
-      // 지난 달 매출
+      // 1-2. 지난 달 매출
       prisma.contract.aggregate({
         where: {
           companyId,
@@ -52,7 +51,7 @@ export const dashboardService = {
         _sum: { contractPrice: true },
       }),
 
-      // 진행 중인 계약
+      // 1-3. 진행 중인 계약
       prisma.contract.count({
         where: {
           companyId,
@@ -66,12 +65,12 @@ export const dashboardService = {
         },
       }),
 
-      // 완료된 총 계약
+      // 1-4. 완료된 총 계약
       prisma.contract.count({
         where: { companyId, status: successfulStatus },
       }),
 
-      // 차종별 집계 (DB에서 직접 계산)
+      // 1-5. 차종별 집계 (DB에서 직접 계산)
       prisma.contract.groupBy({
         by: ['carId'], // 실제 관계 구조에 따라 car.carModel.type으로 접근하려면 Join/Include 확인 필요
         where: { companyId },
@@ -86,28 +85,28 @@ export const dashboardService = {
     const monthlySales = monthlySalesData._sum.contractPrice || 0;
     const lastMonthSales = lastMonthSalesData._sum.contractPrice || 0;
 
-    // 성장률 계산 개선
+    // 2. 성장률 계산
     let growthRate = 0;
 
     if (lastMonthSales > 0) {
-      // 1. 기본 성장률 계산
+      // 2-1. 기본 성장률 계산
       const rate = ((monthlySales - lastMonthSales) / lastMonthSales) * 100;
-      // 2. 소수점 둘째 자리 반올림
+      // 2-2. 소수점 둘째 자리 반올림
       growthRate = Number(rate.toFixed(2));
     } else if (monthlySales > 0) {
-      // 3. 지난 달 매출 0원 -> 이번 달 매출 발생 시
+      // 2-3. 지난 달 매출 0원 -> 이번 달 매출 발생 시
       // 상황에 따라 100% 표기 적절한지 기획 확인 필요
       growthRate = 100;
     } else if (lastMonthSales === 0 && monthlySales === 0) {
-      // 4. 둘 다 0원인 경우
+      // 2-4. 둘 다 0원인 경우
       growthRate = 0;
     } else {
-      // 5. 예외 (지난 달이 음수였거나 특이 케이스)
+      // 2-5. 예외 (지난 달이 음수였거나 특이 케이스)
       // 대시보드 성격에 따라 0으로 처리하거나 별도 로직 적용
       growthRate = 0;
     }
 
-    // ... 집계 데이터 가공 로직
+    // 3. 집계 데이터 가공 로직
     return {
       monthlySales,
       lastMonthSales,

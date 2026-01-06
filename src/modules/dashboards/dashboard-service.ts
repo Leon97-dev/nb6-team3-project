@@ -81,8 +81,8 @@ export const dashboardService = {
     const contracts = (await prisma.contract.findMany({
       where: { companyId },
       select: {
-        status: true,
-        contractPrice: true,
+        ContractStatus: true,
+        ContractPrice: true,
         car: {
           select: {
             carModel: {
@@ -97,18 +97,18 @@ export const dashboardService = {
     const contractTypeCounts: Record<string, number> = {};
     const salesByType: Record<string, number> = {};
 
-    contracts.forEach((contract) => {
+    contracts.forEach((Contract) => {
       // 차종(Label) 추출 (데이터가 없을 경우 'Unknown' 처리)
-      const typeLabel = contract.car?.carModel?.type ?? 'Unknown';
+      const typeLabel = Contract.car?.carModel?.type ?? 'Unknown';
 
       // 1. 차종별 계약 건수 누적
-      contractTypeCounts[typeLabel] = (contractTypeCounts[typeLabel] ?? 0) + 1;
+      contractTypeCounts[typeLabel] = (contractTypeCounts[typeLabel] || 0) + 1;
 
       // 2. 차종별 매출액 누적 (성공한 계약만)
-      if (contract.status === successfulStatus) {
+      if (Contract.status === successfulStatus) {
         // (수정) 괄호 닫기 오류 수정 및 Null 병합 연산자(??)로 안전하게 처리
         salesByType[typeLabel] =
-          (salesByType[typeLabel] ?? 0) + (contract.contractPrice ?? 0);
+          (salesByType[typeLabel] || 0) + (Contract.contractPrice || 0);
       }
     });
 
@@ -122,13 +122,13 @@ export const dashboardService = {
     // 배열 형태로 변환: 계약 건수
     const contractsByCarType = Array.from(uniqueTypes).map((type) => ({
       carType: type,
-      count: contractTypeCounts[type] ?? 0,
+      count: contractTypeCounts[type] || 0,
     }));
 
     // 배열 형태로 변환: 매출액
     const salesByCarType = Array.from(uniqueTypes).map((type) => ({
       carType: type,
-      price: salesByType[type] ?? 0,
+      price: salesByType[type] || 0,
     }));
 
     // 7. 최종 대시보드 데이터 반환
