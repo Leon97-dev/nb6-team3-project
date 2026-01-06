@@ -5,6 +5,7 @@ import asyncHandler from '../../errors/async-handler.js';
 
 const router = Router();
 
+// 라우트 설정
 router.post(
   '/upload',
   upload.single('file'),
