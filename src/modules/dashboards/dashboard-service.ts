@@ -35,6 +35,7 @@ export const dashboardService = {
       },
       _sum: { contractPrice: true },
     });
+
     // 2. 지난 달 매출 및 계약 건수
     const lastMonthSalesData = await prisma.contract.aggregate({
       where: {
@@ -48,11 +49,13 @@ export const dashboardService = {
     const monthlySales = monthlySalesData._sum.contractPrice || 0;
     const lastMonthSales = lastMonthSalesData._sum.contractPrice || 0;
 
+    // 성장률 계산 개선
     const growthRate =
       lastMonthSales === 0
         ? 100
         : ((monthlySales - lastMonthSales) / lastMonthSales) * 100;
 
+    // 3. 진행 중인 계약
     const proceedingContractsCount = await prisma.contract.count({
       where: {
         companyId,
@@ -66,6 +69,7 @@ export const dashboardService = {
       },
     });
 
+    // 4. 완료된 총 계약
     const completedContractsCount = await prisma.contract.count({
       where: {
         companyId,
@@ -73,43 +77,61 @@ export const dashboardService = {
       },
     });
 
+    // 5. 차종별 집계 데이터 조회
     const contracts = (await prisma.contract.findMany({
       where: { companyId },
       select: {
         status: true,
         contractPrice: true,
-        car: { select: { carModel: { select: { type: true } } } },
+        car: {
+          select: {
+            carModel: {
+              select: { type: true },
+            },
+          },
+        },
       },
     })) as ContractWithCar[];
 
+    // 5-1) 차종별 계약 건수 및 매출액 집계 (Aggregation)
     const contractTypeCounts: Record<string, number> = {};
     const salesByType: Record<string, number> = {};
 
     contracts.forEach((contract) => {
-      const typeLabel = contract.car.carModel.type;
-      contractTypeCounts[typeLabel] = (contractTypeCounts[typeLabel] || 0) + 1;
+      // 차종(Label) 추출 (데이터가 없을 경우 'Unknown' 처리)
+      const typeLabel = contract.car?.carModel?.type ?? 'Unknown';
 
+      // 1. 차종별 계약 건수 누적
+      contractTypeCounts[typeLabel] = (contractTypeCounts[typeLabel] ?? 0) + 1;
+
+      // 2. 차종별 매출액 누적 (성공한 계약만)
       if (contract.status === successfulStatus) {
+        // (수정) 괄호 닫기 오류 수정 및 Null 병합 연산자(??)로 안전하게 처리
         salesByType[typeLabel] =
-          (salesByType[typeLabel] || 0) + contract.contractPrice || 0;
+          (salesByType[typeLabel] ?? 0) + (contract.contractPrice ?? 0);
       }
     });
 
+    // 6. 차트/프론트엔드용 데이터 포맷팅 (Data Formatting)
+    // 모든 키(Key) 수집 (건수는 있지만 매출은 0인 경우 등을 모두 포함하기 위함)
     const uniqueTypes = new Set([
       ...Object.keys(contractTypeCounts),
       ...Object.keys(salesByType),
     ]);
 
+    // 배열 형태로 변환: 계약 건수
     const contractsByCarType = Array.from(uniqueTypes).map((type) => ({
       carType: type,
-      count: contractTypeCounts[type] || 0,
+      count: contractTypeCounts[type] ?? 0,
     }));
 
+    // 배열 형태로 변환: 매출액
     const salesByCarType = Array.from(uniqueTypes).map((type) => ({
       carType: type,
-      count: salesByType[type] || 0,
+      price: salesByType[type] ?? 0,
     }));
 
+    // 7. 최종 대시보드 데이터 반환
     return {
       monthlySales,
       lastMonthSales,
