@@ -1,58 +1,113 @@
-import type { Request, Response } from 'express';
-import { CarService } from './car-service.js';
-import { parseCarCsv } from '../cars/car-csv.js';
+import type { NextFunction, Request, Response } from 'express';
+import { CarService, CarServiceBulk } from './car-service.js';
+import { ValidationError } from '../../errors/error-handler.js';
+import type { GetCarsQuery, CarListQuery } from '../../types/car.d.js';
 
 export class CarController {
-  static async list(req: Request, res: Response) {
-    const result = await CarService.findList(req.user!.companyId, req.query);
-    res.json(result);
-  }
+  // 차량 목록 조회
+  static async list(req: Request, res: Response, next: NextFunction) {
+    try {
+      const q = req.query as GetCarsQuery;
 
-  static async detail(req: Request, res: Response) {
-    const carId = Number(req.params.carId);
-    const car = await CarService.findOne(req.user!.companyId, carId);
+      const query: CarListQuery = {};
 
-    res.json({
-      id: car.id,
-      carNumber: car.carNumber,
-      manufacturer: car.carModel.manufacturer,
-      model: car.carModel.model,
-      type: car.carModel.type,
-      manufacturingYear: car.manufacturingYear,
-      mileage: car.mileage,
-      price: car.price,
-      accidentCount: car.accidentCount,
-      explanation: car.explanation,
-      accidentDetails: car.accidentDetails,
-      status: car.status,
-    });
-  }
+      if (q.page !== undefined) query.page = Number(q.page);
+      if (q.pageSize !== undefined) query.pageSize = Number(q.pageSize);
+      if (q.status !== undefined) query.status = q.status;
+      if (q.searchBy !== undefined) query.searchBy = q.searchBy;
+      if (q.keyword !== undefined) query.keyword = q.keyword;
 
-  static async create(req: Request, res: Response) {
-    const car = await CarService.create(req.user!.companyId, req.body);
-    res.status(201).json(car);
-  }
-
-  static async upload(req: Request, res: Response) {
-    const file = req.file!;
-    const cars = await parseCarCsv(file.path);
-
-    for (const car of cars) {
-      await CarService.create(req.user!.companyId, car);
+      const result = await CarService.list(req.user!.companyId, query);
+      res.status(200).json(result);
+    } catch (e) {
+      next(e);
     }
-
-    res.json({ message: '성공적으로 등록되었습니다' });
   }
 
-  static async update(req: Request, res: Response) {
-    const carId = Number(req.params.carId);
-    const car = await CarService.update(req.user!.companyId, carId, req.body);
-    res.json(car);
+  // 차량 상세 조회
+  static async detail(req: Request, res: Response, next: NextFunction) {
+    try {
+      const carId = Number(req.params.carId);
+      const car = await CarService.detail(req.user!.companyId, carId);
+
+      res.status(200).json({
+        id: car.id,
+        carNumber: car.carNumber,
+        manufacturer: car.carModel.manufacturer,
+        model: car.carModel.model,
+        type: car.carModel.type,
+        manufacturingYear: car.manufacturingYear,
+        mileage: car.mileage,
+        price: car.price,
+        accidentCount: car.accidentCount,
+        explanation: car.explanation,
+        accidentDetails: car.accidentDetails,
+        status: car.status,
+      });
+    } catch (e) {
+      next(e);
+    }
   }
 
-  static async delete(req: Request, res: Response) {
-    const carId = Number(req.params.carId);
-    await CarService.delete(req.user!.companyId, carId);
-    res.json({ message: '차량 삭제 성공' });
+  // 차량 등록
+  static async create(req: Request, res: Response, next: NextFunction) {
+    try {
+      const car = await CarService.create(req.user!.companyId, req.body);
+      res.status(201).json(car);
+    } catch (e) {
+      next(e);
+    }
+  }
+
+  // 차량 수정
+  static async update(req: Request, res: Response, next: NextFunction) {
+    try {
+      const carId = Number(req.params.carId);
+      const car = await CarService.update(req.user!.companyId, carId, req.body);
+
+      res.status(200).json(car);
+    } catch (e) {
+      next(e);
+    }
+  }
+
+  // 차량 삭제
+  static async delete(req: Request, res: Response, next: NextFunction) {
+    try {
+      const carId = Number(req.params.carId);
+      await CarService.delete(req.user!.companyId, carId);
+
+      res.status(200).json({ message: '차량 삭제 성공' });
+    } catch (e) {
+      next(e);
+    }
+  }
+
+  // CSV 대용량 업로드
+  static async upload(req: Request, res: Response, next: NextFunction) {
+    try {
+      if (!req.file) {
+        throw new ValidationError(null, 'CSV 파일이 필요합니다');
+      }
+
+      const result = await CarServiceBulk.bulkUploadCsv(
+        req.user!.companyId,
+        req.file.buffer
+      );
+
+      res.status(200).json(result);
+    } catch (e) {
+      next(e);
+    }
+  }
+
+  // 차량 모델 목록 조회
+  static async models(req: Request, res: Response, next: NextFunction) {
+    try {
+      const models = await CarService.listCarModels(req.user!.companyId);
+      res.status(200).json(models);
+    } catch (e) {
+      next(e);
+    }
   }
 }

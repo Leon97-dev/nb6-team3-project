@@ -54,8 +54,13 @@ export class CarRepository {
     return prisma.car.delete({ where: { id: carId } });
   }
 
-  static findCarModelsGrouped() {
+  static findCarModelsGrouped(companyId: number) {
     return prisma.carModel.findMany({
+      where: {
+        cars: {
+          some: { companyId },
+        },
+      },
       select: {
         manufacturer: true,
         model: true,
