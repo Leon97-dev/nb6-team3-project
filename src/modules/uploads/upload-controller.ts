@@ -1,3 +1,11 @@
+/**
+ * @description 이미지 업로드 컨트롤러 모듈
+ * 로직의 흐름을 조율하고 지시하는 역할
+ * @author 정현준
+ * @date 2026-01-07
+ * @version 1.0
+ **/
+
 import type { Request, Response } from 'express';
 import { uploadService } from './upload-service.js';
 
