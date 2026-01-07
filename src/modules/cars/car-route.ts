@@ -4,15 +4,26 @@ import { requireAuth } from '../../middlewares/auth.js';
 import { CarController } from './car-controller.js';
 
 const router = Router();
-const upload = multer({ dest: 'uploads/' });
+const upload = multer({ storage: multer.memoryStorage() });
 
-router.use(requireAuth);
-
-router.get('/', CarController.list);
-router.get('/:carId', CarController.detail);
-router.post('/', CarController.create);
-router.post('/upload', upload.single('file'), CarController.upload);
-router.patch('/:carId', CarController.update);
-router.delete('/:carId', CarController.delete);
+//차량 목록 조회
+router.get('/', requireAuth, CarController.list);
+// 차량 등록
+router.post('/', requireAuth, CarController.create);
+//차량 데이터 대용량 업로드
+router.post(
+  '/upload',
+  requireAuth,
+  upload.single('file'),
+  CarController.upload
+);
+// 차량 상세 조회
+router.get('/:carId', requireAuth, CarController.detail);
+// 차량 수정
+router.patch('/:carId', requireAuth, CarController.update);
+// 차량 삭제
+router.delete('/:carId', requireAuth, CarController.delete);
+//차량 모델 목록 조회
+router.get('/models', requireAuth, CarController.models);
 
 export default router;

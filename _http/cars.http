@@ -22,7 +22,7 @@ Authorization: Bearer {{accessToken}}
 ### 차량 데이터 대용량 업로드
 POST {{base}}/upload
 Authorization: Bearer {{accessToken}}
-Content-Type: application/json
+Content-Type: multipart/form-data
 
 {
 	"file": "File"

@@ -1,12 +1,15 @@
-// types/car.d.ts
-
 import { Car, CarModel, CarStatus, CarType } from '@prisma/client';
 
 // 차량 목록 조회를 위한 쿼리 파라미터 타입
+export type CarStatusQuery =
+  | 'possession'
+  | 'contractProceeding'
+  | 'contractCompleted';
+
 export interface GetCarsQuery {
   page?: string;
   pageSize?: string;
-  status?: CarStatus;
+  status?: CarStatusQuery;
   searchBy?: 'carNumber' | 'model';
   keyword?: string;
 }
@@ -44,7 +47,13 @@ export interface CarModelResponse {
 export interface CarListQuery {
   page?: number;
   pageSize?: number;
-  status?: CarStatus;
+  status?: CarStatusQuery;
   searchBy?: 'carNumber' | 'model';
   keyword?: string;
+}
+
+// 차량 모델 목록 조회 시 사용되는 쿼리 타입
+export interface CarModelListQuery {
+  manufacturer?: string;
+  model?: string[];
 }

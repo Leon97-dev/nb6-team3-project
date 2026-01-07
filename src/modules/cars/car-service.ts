@@ -4,21 +4,46 @@ import type {
   CreateCarDto,
   UpdateCarDto,
   CarListQuery,
+  CarStatusQuery,
 } from '../../types/car.d.js';
+import { CarStatus, CarType } from '@prisma/client';
+import csv from 'csv-parser';
+import { Readable } from 'stream';
+import { CarCsvSchema } from './car-csv.schema.js';
+import type { Prisma } from '@prisma/client';
+import { z } from 'zod';
+
+const BATCH_SIZE = 200;
+
+export interface CarModelListItem {
+  manufacturer: string;
+  model: string[];
+}
 
 export class CarService {
   static async getOrCreateCarModel(
     manufacturer: string,
     model: string,
-    type: any
+    type: CarType
   ) {
     return prisma.carModel.upsert({
-      where: {
-        manufacturer_model: { manufacturer, model },
-      },
+      where: { manufacturer_model: { manufacturer, model } },
       update: {},
       create: { manufacturer, model, type },
     });
+  }
+
+  private static mapStatus(status?: CarStatusQuery): CarStatus | undefined {
+    switch (status) {
+      case 'possession':
+        return CarStatus.POSSESSION;
+      case 'contractProceeding':
+        return CarStatus.CONTRACT_PROCEEDING;
+      case 'contractCompleted':
+        return CarStatus.CONTRACT_COMPLETED;
+      default:
+        return undefined;
+    }
   }
 
   static async create(companyId: number, dto: CreateCarDto) {
@@ -35,12 +60,8 @@ export class CarService {
         mileage: dto.mileage,
         price: dto.price,
         accidentCount: dto.accidentCount,
-        ...(dto.explanation !== undefined && {
-          explanation: dto.explanation,
-        }),
-        ...(dto.accidentDetails !== undefined && {
-          accidentDetails: dto.accidentDetails,
-        }),
+        explanation: dto.explanation ?? null,
+        accidentDetails: dto.accidentDetails ?? null,
         companyId,
         carModelId: carModel.id,
       },
@@ -48,21 +69,20 @@ export class CarService {
     });
   }
 
-  static async findList(companyId: number, query: CarListQuery) {
+  static async list(companyId: number, query: CarListQuery) {
     const page = query.page ?? 1;
     const pageSize = query.pageSize ?? 10;
 
-    const where: any = { companyId };
+    const where: Prisma.CarWhereInput = { companyId };
 
-    if (query.status) where.status = query.status;
+    const status = this.mapStatus(query.status);
+    if (status) where.status = status;
 
     if (query.searchBy && query.keyword) {
       if (query.searchBy === 'carNumber') {
         where.carNumber = { contains: query.keyword };
       } else {
-        where.carModel = {
-          model: { contains: query.keyword },
-        };
+        where.carModel = { model: { contains: query.keyword } };
       }
     }
 
@@ -98,19 +118,18 @@ export class CarService {
     };
   }
 
-  static async findOne(companyId: number, carId: number) {
+  static async detail(companyId: number, carId: number) {
     const car = await prisma.car.findFirst({
       where: { id: carId, companyId },
       include: { carModel: true },
     });
 
     if (!car) throw new NotFoundError('존재하지 않는 차량입니다');
-
     return car;
   }
 
   static async update(companyId: number, carId: number, dto: UpdateCarDto) {
-    const car = await this.findOne(companyId, carId);
+    const car = await this.detail(companyId, carId);
 
     let carModelId = car.carModelId;
 
@@ -125,16 +144,133 @@ export class CarService {
 
     return prisma.car.update({
       where: { id: carId },
-      data: {
-        ...dto,
-        carModelId,
-      },
+      data: { ...dto, carModelId },
       include: { carModel: true },
     });
   }
 
   static async delete(companyId: number, carId: number) {
-    await this.findOne(companyId, carId);
+    await this.detail(companyId, carId);
     await prisma.car.delete({ where: { id: carId } });
+  }
+
+  // 차량 모델 목록 조회
+  static async listCarModels(
+    companyId: number
+  ): Promise<{ data: CarModelListItem[] }> {
+    const models = await prisma.carModel.findMany({
+      where: { cars: { some: { companyId } } },
+      select: { manufacturer: true, model: true },
+      orderBy: { manufacturer: 'asc' },
+    });
+
+    const grouped = models.reduce<Record<string, string[]>>((acc, cur) => {
+      const manufacturer = cur.manufacturer;
+
+      if (!acc[manufacturer]) {
+        acc[manufacturer] = [];
+      }
+
+      acc[manufacturer].push(cur.model);
+      return acc;
+    }, {});
+
+    return {
+      data: Object.entries(grouped).map(([manufacturer, model]) => ({
+        manufacturer,
+        model,
+      })),
+    };
+  }
+}
+
+/* ================= CSV BULK ================= */
+
+type CarCsvRow = z.infer<typeof CarCsvSchema>;
+
+const CAR_TYPE_MAP: Record<'SEDAN' | 'SUV' | 'TRUCK', CarType> = {
+  SEDAN: CarType.MID_SIZE,
+  SUV: CarType.SUV,
+  TRUCK: CarType.LARGE,
+};
+
+export class CarServiceBulk {
+  static async bulkUploadCsv(companyId: number, buffer: Buffer) {
+    let success = 0;
+    const failed: { row: number; reason: string }[] = [];
+    let batch: CarCsvRow[] = [];
+    let rowNumber = 1;
+
+    for await (const row of Readable.from(buffer).pipe(csv())) {
+      const parsed = CarCsvSchema.safeParse(row);
+
+      if (!parsed.success) {
+        failed.push({
+          row: rowNumber++,
+          reason: parsed.error.issues[0]?.message ?? '잘못된 요청입니다',
+        });
+        continue;
+      }
+
+      batch.push(parsed.data);
+
+      if (batch.length === BATCH_SIZE) {
+        success += await this.insertBatch(companyId, batch);
+        batch = [];
+      }
+
+      rowNumber++;
+    }
+
+    if (batch.length) {
+      success += await this.insertBatch(companyId, batch);
+    }
+
+    return {
+      successCount: success,
+      failCount: failed.length,
+      failedRows: failed,
+    };
+  }
+
+  private static async insertBatch(companyId: number, cars: CarCsvRow[]) {
+    let inserted = 0;
+
+    await prisma.$transaction(async (tx) => {
+      for (const dto of cars) {
+        const carModel = await tx.carModel.upsert({
+          where: {
+            manufacturer_model: {
+              manufacturer: dto.manufacturer,
+              model: dto.model,
+            },
+          },
+          update: {},
+          create: {
+            manufacturer: dto.manufacturer,
+            model: dto.model,
+            type: CAR_TYPE_MAP[dto.type],
+          },
+        });
+
+        await tx.car.create({
+          data: {
+            carNumber: dto.carNumber,
+            manufacturingYear: dto.manufacturingYear,
+            mileage: dto.mileage,
+            price: dto.price,
+            accidentCount: dto.accidentCount,
+            explanation: dto.explanation ?? null,
+            accidentDetails: dto.accidentDetails ?? null,
+            companyId,
+            carModelId: carModel.id,
+          },
+        });
+
+        inserted++;
+      }
+    });
+
+    return inserted;
   }
 }
