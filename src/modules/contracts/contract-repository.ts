@@ -53,7 +53,7 @@ class ContractRepository {
                 car: {
                     select: {
                         id: true,
-                        model: true,
+                        carModel: true,
                     },
                 },
             }
@@ -93,7 +93,7 @@ class ContractRepository {
                 car: {
                     select: {
                         id: true,
-                        model: true,
+                        carModel: true,
                     },
                 },
             }
@@ -126,7 +126,7 @@ class ContractRepository {
             where: {
                 id: carId,
             }, select: {
-                model: true,
+                carModel: true,
             }
         });
         return companyId;
@@ -167,7 +167,7 @@ class ContractRepository {
             },
             select: {
                 id: true,
-                model: true,
+                carModel: true,
                 carNumber: true
             }
         });
