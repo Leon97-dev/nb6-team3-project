@@ -29,7 +29,10 @@ export const validate =
           : req.params;
 
     try {
-      const result = superstructValidate(data, schema);
+      const [error, result] = superstructValidate(data, schema);
+      if (error) {
+        throw error;
+      }
 
       if (target === 'body') {
         req.body = result;
