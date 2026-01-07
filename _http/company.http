@@ -1,0 +1,43 @@
+### 환경 설정
+@base = http://localhost:3000
+@accessToken = 
+
+### 회사 등록 (관리자)
+POST {{base}}/companies
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "companyName": "현대 자동차",
+  "companyCode": "company005"
+}
+
+### 회사 목록 조회 (전체, 페이징 없이 — 관리자)
+GET {{base}}/companies
+Authorization: Bearer {{accessToken}}
+
+### 회사 목록 조회 (검색/페이지네이션)
+GET {{base}}/companies?page=1&pageSize=10&searchBy=companyName&keyword=테스트
+Authorization: Bearer {{accessToken}}
+
+### 회사별 유저 조회 (관리자)
+GET {{base}}/companies/users?page=1&pageSize=10&searchBy=name&keyword=관리자
+Authorization: Bearer {{accessToken}}
+
+### 회사별 유저 조회 (직원)
+GET {{base}}/companies/users?page=1&pageSize=10&searchBy=name&keyword=직원
+Authorization: Bearer {{accessToken}}
+
+### 회사 수정
+PATCH {{base}}/companies/{companyId}
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "companyName": "삼성 자동차",
+  "companyCode": "company003-updated"
+}
+
+### 회사 삭제
+DELETE {{base}}/companies/{companyId}
+Authorization: Bearer {{accessToken}}
