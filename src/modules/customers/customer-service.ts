@@ -1,10 +1,14 @@
 import prisma from '../../configs/prisma.js';
 import { CustomerRepository } from './customer-repository.js';
-import type { Customer, Prisma, AgeGroup, Gender, Region } from '@prisma/client';
-import {
-  ConflictError,
-  NotFoundError,
-} from '../../errors/error-handler.js';
+import type {
+  Customer,
+  Prisma,
+  AgeGroup,
+  Gender,
+  Region,
+} from '@prisma/client';
+import { ConflictError, NotFoundError } from '../../errors/error-handler.js';
+
 import type {
   CreateCustomerBody,
   UpdateCustomerBody,
@@ -45,6 +49,29 @@ const genderFromDb: Record<Gender, GenderValue> = {
   FEMALE: 'female',
 };
 
+const AgeGroupFromDb: Record<AgeGroup, AgeGroupValue> = {
+  TEEN_10: '10대',
+  TWENTIES_20: '20대',
+  THIRTIES_30: '30대',
+  FORTIES_40: '40대',
+  FIFTIES_50: '50대',
+  SIXTIES_60: '60대',
+  SEVENTIES_70: '70대',
+  EIGHTIES_80: '80대',
+};
+
+//CSV에서 들어오는 ageGroup 문자열을 내부 표현으로 변환하기 위한 매핑 테이블 추가
+const csvAgeGroupMap: Record<string, AgeGroupValue> = {
+  '10-20': '10대',
+  '20-30': '20대',
+  '30-40': '30대',
+  '40-50': '40대',
+  '50-60': '50대',
+  '60-70': '60대',
+  '70-80': '70대',
+  '80-90': '80대',
+};
+
 const ageGroupToDb: Record<AgeGroupValue, AgeGroup> = {
   '10대': 'TEEN_10',
   '20대': 'TWENTIES_20',
@@ -52,8 +79,8 @@ const ageGroupToDb: Record<AgeGroupValue, AgeGroup> = {
   '40대': 'FORTIES_40',
   '50대': 'FIFTIES_50',
   '60대': 'SIXTIES_60',
-  '70대': 'SEVENTIES_70',
   '80대': 'EIGHTIES_80',
+  '70대': 'SEVENTIES_70',
 };
 
 const ageGroupFromDb: Record<AgeGroup, AgeGroupValue> = {
@@ -131,6 +158,21 @@ export class CustomerService {
     };
   }
 
+  // CSV로 들어온 ageGroup("30-40" 등)을 내부 도메인 표현 ("30대")으로 변환하기 위한 함수
+  private normalizeCsvAgeGroup(ageGroup: string | null): AgeGroupValue | null {
+    if (!ageGroup) {
+      return null;
+    }
+
+    // CSV 형식 ("30-40" 등)이면 매핑해서 변환
+    if (csvAgeGroupMap[ageGroup]) {
+      return csvAgeGroupMap[ageGroup];
+    }
+
+    // 이미 내부 도메인 형식("30대")이면 그대로 사용
+    return ageGroup as AgeGroupValue;
+  }
+
   private async ensureUnique(
     companyId: number,
     phoneNumber: string,
@@ -175,18 +217,37 @@ export class CustomerService {
   }
 
   private toUpdateInput(body: UpdateCustomerBody): Prisma.CustomerUpdateInput {
-    return {
-      name: body.name,
-      gender: genderToDb[body.gender],
-      phoneNumber: body.phoneNumber,
-      ageGroup: ageGroupToDb[body.ageGroup],
-      region: regionToDb[body.region],
-      email: body.email,
-      memo: body.memo,
-    };
+    const data: Prisma.CustomerUpdateInput = {};
+
+    if (body.name !== undefined) {
+      data.name = body.name;
+    }
+    if (body.gender !== undefined) {
+      data.gender = genderToDb[body.gender];
+    }
+    if (body.phoneNumber !== undefined) {
+      data.phoneNumber = body.phoneNumber;
+    }
+    if (body.ageGroup !== undefined) {
+      data.ageGroup = ageGroupToDb[body.ageGroup];
+    }
+    if (body.region !== undefined) {
+      data.region = regionToDb[body.region];
+    }
+    if (body.email !== undefined) {
+      data.email = body.email;
+    }
+    if (body.memo !== undefined) {
+      data.memo = body.memo;
+    }
+
+    return data;
   }
 
-  async create(body: CreateCustomerBody, companyId: number): Promise<CustomerDTO> {
+  async create(
+    body: CreateCustomerBody,
+    companyId: number
+  ): Promise<CustomerDTO> {
     await this.ensureUnique(companyId, body.phoneNumber, body.email);
     const created = await this.repo.create(this.toCreateInput(body, companyId));
 
@@ -208,11 +269,27 @@ export class CustomerService {
     const exists = await this.repo.findById(customerId, companyId);
     if (!exists) throw new NotFoundError('존재하지 않는 고객입니다');
 
-    if (body.phoneNumber !== exists.phoneNumber || body.email !== exists.email) {
-      await this.ensureUnique(companyId, body.phoneNumber, body.email, customerId);
+    if (body.phoneNumber !== undefined || body.email !== undefined) {
+      const nextPhoneNumber = body.phoneNumber ?? exists.phoneNumber;
+      const nextEmail = body.email ?? exists.email;
+
+      if (
+        nextPhoneNumber !== exists.phoneNumber ||
+        nextEmail !== exists.email
+      ) {
+        await this.ensureUnique(
+          companyId,
+          nextPhoneNumber,
+          nextEmail,
+          customerId
+        );
+      }
     }
 
-    const updated = await this.repo.update(customerId, this.toUpdateInput(body));
+    const updated = await this.repo.update(
+      customerId,
+      this.toUpdateInput(body)
+    );
     return this.toDTO(updated);
   }
 
@@ -249,16 +326,20 @@ export class CustomerService {
       await this.ensureUnique(companyId, row.phoneNumber, row.email);
     }
 
-    const data: Prisma.CustomerCreateManyInput[] = rows.map((row) => ({
-      name: row.name,
-      gender: genderToDb[row.gender],
-      phoneNumber: row.phoneNumber,
-      ageGroup: ageGroupToDb[row.ageGroup],
-      region: regionToDb[row.region],
-      email: row.email,
-      memo: row.memo,
-      companyId,
-    }));
+    const data: Prisma.CustomerCreateManyInput[] = rows.map((row) => {
+      const normalizedAgeGroup = this.normalizeCsvAgeGroup(row.ageGroup);
+
+      return {
+        name: row.name,
+        gender: genderToDb[row.gender],
+        phoneNumber: row.phoneNumber,
+        ageGroup: ageGroupToDb[row.ageGroup],
+        region: regionToDb[row.region],
+        email: row.email,
+        memo: row.memo,
+        companyId,
+      };
+    });
 
     await this.repo.createMany(data);
   }
