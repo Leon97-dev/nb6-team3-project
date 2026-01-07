@@ -1,9 +1,6 @@
-import multer from 'multer';
-import { Router } from 'express';
 import type { NextFunction, Request, Response } from 'express';
 import { CarService, CarServiceBulk } from './car-service.js';
 import { ValidationError } from '../../errors/error-handler.js';
-import { requireAuth } from '../../middlewares/auth.js';
 import type { GetCarsQuery, CarListQuery } from '../../types/car.d.js';
 
 export class CarController {
