@@ -1,0 +1,11 @@
+### 환경 설정
+@base = http://localhost:3000
+
+### 서버 상태 확인
+GET {{base}}/images/upload
+
+### 데이터베이스 상태 확인  
+GET {{base}}/upload/db
+
+### 이미지 URL 생성
+POST {{base}}/images/upload
