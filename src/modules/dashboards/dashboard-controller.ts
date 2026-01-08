@@ -1,12 +1,12 @@
 /**
- * @description 대시보드 컨트롤러 모듈 정리본
+ * @description 대시보드 컨트롤러 모듈
  * 대시보드 관련 요청을 처리하는 기능을 제공합니다.
  * @author 정현준
  * @date 2026-01-08
  * @version 1.0
  **/
 
-import { Request, Response } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import { dashboardService } from '../dashboards/dashboard-service.js';
 import { success } from 'zod';
 
@@ -15,7 +15,7 @@ export const dashboardController = {
    * 대시보드 통계조회
    * GET /api/dashboard
    */
-  async getDashboard(req: Request, res: Response) {
+  async getDashboard(req: Request, res: Response, next: NextFunction) {
     try {
       // 1. 인증 미들웨어에서 주입된 user 정보 확인
       const companyId = req.user?.companyId;
@@ -37,6 +37,7 @@ export const dashboardController = {
       });
     } catch (error) {
       // 4. 에러 발생 시 공통 에러 핸들러로 전달
+      next(error);
     }
   },
 };
