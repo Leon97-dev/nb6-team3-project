@@ -2,7 +2,7 @@
  * @description 이미지 업로드 서비스 모듈
  * 컨트롤러로부터 지시받은 내용 수행 및 URL을 생성하는 구체적인 로직 존재
  * @author 정현준
- * @date 2026-01-07
+ * @date 2026-01-08
  * @version 1.0
  **/
 export const uploadService = {
