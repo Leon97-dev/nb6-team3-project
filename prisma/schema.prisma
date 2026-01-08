@@ -11,13 +11,13 @@ datasource db {
 // 🏢 Company (회사)
 // ===================================
 model Company {
-  id          Int    @id @default(autoincrement())
-  companyName String
+  id Int @id @default(autoincrement())
+  companyName String @unique
   companyCode String @unique
 
   // Relations
-  users     User[]
-  cars      Car[]
+  users User[]
+  cars Car[]
   customers Customer[]
   contracts Contract[]
 
@@ -30,20 +30,20 @@ model Company {
 // 👨🏻‍💼 User (직원: 회사 소속, 관리자 포함)
 // ===================================
 model User {
-  id             Int     @id @default(autoincrement())
-  name           String
-  email          String  @unique
-  employeeNumber String
-  phoneNumber    String
-  password       String
-  imageUrl       String?
-  isAdmin        Boolean @default(false)
+  id Int @id @default(autoincrement())
+  name String
+  email String @unique
+  password String
+  employeeNumber String 
+  phoneNumber String
+  imageUrl String?
+  isAdmin Boolean @default(false)
 
   // Relations
   companyId Int
-  company   Company @relation(fields: [companyId], references: [id], onDelete: Restrict)
+  company Company @relation(fields: [companyId], references: [id], onDelete: Restrict)
 
-  contracts    Contract[]
+  contracts Contract[]
   uploadedDocs ContractDocument[] @relation("UploadedDocs")
 
   // timestamps
@@ -51,6 +51,7 @@ model User {
   updatedAt DateTime @updatedAt
 
   // indexes
+  @@index([companyId])
   @@unique([companyId, employeeNumber])
 }
 
@@ -58,23 +59,25 @@ model User {
 // 🚗 Car (차량)
 // ===================================
 model Car {
-  id        Int       @id @default(autoincrement())
+  id Int @id @default(autoincrement())
   carNumber String
-  status    CarStatus @default(POSSESSION)
+  manufacturer String
+  model String
+  type CarType
+  status CarStatus @default(POSSESSION)
 
   // 차량 상태
   manufacturingYear Int
-  mileage           Int
-  price             Int
-  accidentCount     Int
-  explanation       String?
-  accidentDetails   String?
+  mileage Int
+  price Int
+  accidentCount Int
+  explanation String?
+  accidentDetails String?
+
 
   // Relations
-  companyId  Int
-  carModelId Int
-  company    Company  @relation(fields: [companyId], references: [id], onDelete: Restrict)
-  carModel   CarModel @relation(fields: [carModelId], references: [id], onDelete: Restrict)
+  companyId Int
+  company Company @relation(fields: [companyId], references: [id], onDelete: Restrict)
 
   contracts Contract[]
 
@@ -83,43 +86,26 @@ model Car {
   updatedAt DateTime @updatedAt
 
   // indexes
+  @@index([companyId])
   @@unique([companyId, carNumber])
-  @@index([carModelId])
-}
-
-// ===================================
-// 🚘 CarModel (차량 모델)
-// ===================================
-model CarModel {
-  id           Int     @id @default(autoincrement())
-  manufacturer String
-  model        String
-  type         CarType
-
-  // Relations
-  cars Car[]
-
-  // indexes
-  @@unique([manufacturer, model])
-  @@index([type])
 }
 
 // ===================================
 // 🧑🏻‍💼 Customer (고객)
 // ===================================
 model Customer {
-  id          Int       @id @default(autoincrement())
-  name        String
-  gender      Gender
+  id Int @id @default(autoincrement())
+  name String
+  gender Gender
   phoneNumber String
-  ageGroup    AgeGroup?
-  region      Region?
-  email       String?
-  memo        String?
+  ageGroup AgeGroup?
+  region Region?
+  email String?
+  memo String?
 
   // Relations
   companyId Int
-  company   Company @relation(fields: [companyId], references: [id], onDelete: Restrict)
+  company Company @relation(fields: [companyId], references: [id], onDelete:  Restrict)
 
   contracts Contract[]
 
@@ -128,33 +114,35 @@ model Customer {
   updatedAt DateTime @updatedAt
 
   // indexes
-  @@unique([companyId, email])
-  @@unique([companyId, phoneNumber])
+  @@index([companyId])
   @@index([companyId, name])
+  @@index([companyId, email])
+  @@unique([companyId, phoneNumber])
+  @@unique([companyId, email])
 }
 
 // ===================================
 // 📋 Contract (계약)
 // ===================================
 model Contract {
-  id             Int            @id @default(autoincrement())
-  status         ContractStatus @default(CAR_INSPECTION)
+  id Int @id @default(autoincrement())
+  status ContractStatus @default(CAR_INSPECTION)
   contractName   String?
   contractPrice  Int?
   resolutionDate DateTime?
 
   // Relations
-  companyId Int
-  company   Company @relation(fields: [companyId], references: [id], onDelete: Restrict)
+  companyId Int 
+  company Company @relation(fields: [companyId], references: [id], onDelete: Restrict)
 
   userId Int? // 담당자(유저): 삭제 시 계약은 유지, 담당자만 null 
-  user   User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
 
   customerId Int // 고객: 삭제 시 관련 계약/미팅/알람/계약서 모두 삭제 
-  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  customer Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
 
   carId Int // 차량: 삭제 시 관련 계약/미팅/알람/계약서 모두 삭제 
-  car   Car @relation(fields: [carId], references: [id], onDelete: Cascade)
+  car Car @relation(fields: [carId], references: [id], onDelete: Cascade)
 
   meetings  ContractMeeting[]
   documents ContractDocument[]
@@ -173,8 +161,8 @@ model Contract {
 // 📆 ContractMeeting (계약 미팅)
 // ===================================
 model ContractMeeting {
-  id   Int      @id @default(autoincrement())
-  date DateTime // 미팅 날짜 및 시간
+  id         Int      @id @default(autoincrement())
+  date   DateTime // 미팅 날짜 및 시간
 
   // Relations
   contractId Int
@@ -194,7 +182,7 @@ model ContractMeeting {
 // ⏰ MeetingAlarm (미팅 알람)
 // ===================================
 model MeetingAlarm {
-  id      Int      @id @default(autoincrement())
+  id                Int             @id @default(autoincrement())
   alarmAt DateTime // 알람 시간
 
   // Relations
@@ -203,17 +191,17 @@ model MeetingAlarm {
 
   // timestamps
   @@index([contractMeetingId])
-}
+} 
 
 // ===================================
 // 🗄️ ContractDocument (계약서 파일)
 // ===================================
 model ContractDocument {
-  id          Int     @id @default(autoincrement())
+  id Int @id @default(autoincrement())
   fileName    String // 원본 파일명
   fileUrl     String // 저장된 파일 URL
   fileSize    Int? // 파일 크기 (바이트 단위)
-  contentType String? // MIME 타입
+  contentType String?  // MIME 타입
 
   // Relations
   contractId Int?
@@ -232,6 +220,7 @@ model ContractDocument {
 // ===================================
 // 🧩 ENUM 정의
 // ===================================
+
 enum Gender {
   MALE // 남성
   FEMALE // 여성
@@ -274,7 +263,7 @@ enum CarType {
   LARGE // 대형
   SPORTS_CAR // 스포츠카
   SUV
-}
+} 
 
 enum CarStatus {
   POSSESSION // 대기중
@@ -288,4 +277,14 @@ enum ContractStatus {
   CONTRACT_DRAFT // 계약서 초안
   CONTRACT_SUCCESSFUL // 계약 성공
   CONTRACT_FAILED // 계약 실패
+}
+
+// ===================================
+// 🚘 CarModel: /cars/models 응답용 (선택)
+// ===================================
+model CarModel {
+  id           Int     @id @default(autoincrement())
+  manufacturer String 
+  model        String 
+  type         CarType 
 }

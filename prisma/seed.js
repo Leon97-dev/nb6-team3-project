@@ -98,20 +98,6 @@ async function main() {
     ContractStatus.CONTRACT_FAILED,
   ];
 
-  // 제조사/모델별 CarModel 캐시 (중복 insert 방지)
-  const carModelCache = new Map();
-  const getOrCreateCarModel = async (manufacturer, model) => {
-    const key = `${manufacturer}|${model}`;
-    if (carModelCache.has(key)) return carModelCache.get(key);
-    const carModel = await prisma.carModel.upsert({
-      where: { manufacturer_model: { manufacturer, model } },
-      update: {},
-      create: { manufacturer, model, type: rand(carTypes) },
-    });
-    carModelCache.set(key, carModel);
-    return carModel;
-  };
-
   for (let cIdx = 0; cIdx < companySeeds.length; cIdx++) {
     const seed = companySeeds[cIdx];
     const company = await prisma.company.create({
@@ -158,13 +144,13 @@ async function main() {
     const companyCars = [];
     for (let i = 0; i < 30; i++) {
       const m = rand(manufacturers);
-      const model = rand(modelMap[m]);
-      const carModel = await getOrCreateCarModel(m, model);
       const car = await prisma.car.create({
         data: {
-          company: { connect: { id: company.id } },
+          companyId: company.id,
           carNumber: `${cIdx + 1}${randInt(10, 99)}가${randInt(1000, 9999)}`,
-          carModel: { connect: { id: carModel.id } },
+          manufacturer: m,
+          model: rand(modelMap[m]),
+          type: rand(carTypes),
           manufacturingYear: randInt(2015, 2024),
           mileage: randInt(10000, 150000),
           price: randInt(5000000, 50000000),
@@ -202,19 +188,15 @@ async function main() {
         Date.now() + randInt(1, 14) * 24 * 60 * 60 * 1000
       );
       const alarmOffsetHours = randInt(1, 6);
-      const customer = rand(companyCustomers);
-      const car = rand(companyCars);
-      const user = rand(allUsers.filter((u) => u.companyId === company.id));
 
       await prisma.contract.create({
         data: {
           companyId: company.id,
-          userId: user.id,
-          customerId: customer.id,
-          carId: car.id,
+          userId: rand(allUsers.filter((u) => u.companyId === company.id)).id,
+          customerId: rand(companyCustomers).id,
+          carId: rand(companyCars).id,
           status: rand(contractStatuses),
           contractPrice: randInt(5000000, 50000000),
-          resolutionDate: meetingDate,
           meetings: {
             create: [
               {
@@ -224,7 +206,7 @@ async function main() {
                     {
                       alarmAt: new Date(
                         meetingDate.getTime() -
-                        alarmOffsetHours * 60 * 60 * 1000
+                          alarmOffsetHours * 60 * 60 * 1000
                       ),
                     },
                   ],
@@ -237,7 +219,7 @@ async function main() {
     }
 
     console.log(
-      `[OK] ${seed.name}: 1 admin, 5 users, ${companyCars.length} cars, ${companyCustomers.length} customers, ${contractCount} contracts`
+      `[OK] ${seed.name}: admin+5 users, ${companyCars.length} cars, ${companyCustomers.length} customers, ${contractCount} contracts`
     );
   }
 

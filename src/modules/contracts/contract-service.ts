@@ -13,7 +13,7 @@ class ContractService {
         if (!carInfo) return new NotFoundError("잘못된 요청입니다.(carId)");
         const customerInfo = await contractRepository.findCustomerInfoByCustomerId(contractData.carId);
         if (!customerInfo) return new NotFoundError("잘못된 요청입니다.(customerId)");
-        const _contractName = `${carInfo.carModel} - ${customerInfo.name} 고객님`;
+        const _contractName = `${carInfo.model} - ${customerInfo.name} 고객님`;
         const readyData: ContractInterface.CreateContract = {
             ...contractData,
             contractName: _contractName,
@@ -123,7 +123,7 @@ class ContractService {
         if (!carList) throw new ValidationError("잘못된 요청입니다.");
         const cars = carList.map((car) => ({
             id: car.id,
-            data: `${car.carModel}(${car.carNumber})`
+            data: `${car.model}(${car.carNumber})`
         }));
         return cars;
     }
