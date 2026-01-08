@@ -2,7 +2,7 @@
  * @description 대시보드 컨트롤러 모듈
  * 대시보드 관련 요청을 처리하는 기능을 제공합니다.
  * @author 정현준
- * @date 2026-01-07
+ * @date 2026-01-08
  * @version 1.0
  **/
 
@@ -18,8 +18,8 @@ export const dashboardController = {
   async getDashboard(req: Request, res: Response) {
     try {
       // 1. 인증 미들웨어에서 주입된 user 정보 확인
-      const companyId = req.user!.companyId;
-
+      const companyId = req.user?.companyId;
+      // companyId: 옵셔널 체이닝(?) 사
       if (!companyId) {
         // 서비스 내부 검증과 별개로 컨트롤러 단에서도 방어 로직 추가 가능
         return res
@@ -37,7 +37,6 @@ export const dashboardController = {
       });
     } catch (error) {
       // 4. 에러 발생 시 공통 에러 핸들러로 전달
-      next(error);
     }
   },
 };
