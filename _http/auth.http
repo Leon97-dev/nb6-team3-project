@@ -1,5 +1,5 @@
 ### 환경 설정
-@base = http://localhost:3007
+@base = http://localhost:3000
 @accessToken = 
 @refreshToken = 
 
