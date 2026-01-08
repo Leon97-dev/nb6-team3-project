@@ -40,6 +40,7 @@ async function main() {
   const allUsers = [];
   const allCars = [];
   const allCustomers = [];
+  const carModelNameById = new Map();
 
   const companySeeds = [
     { name: '테스트자동차상사', code: 'company001' },
@@ -172,6 +173,7 @@ async function main() {
           status: CarStatus.POSSESSION,
         },
       });
+      carModelNameById.set(car.id, carModel.model);
       companyCars.push(car);
       allCars.push(car);
     }
@@ -205,6 +207,7 @@ async function main() {
       const customer = rand(companyCustomers);
       const car = rand(companyCars);
       const user = rand(allUsers.filter((u) => u.companyId === company.id));
+      const contractName = `${carModelNameById.get(car.id) ?? '차량'} - ${customer.name} 고객님`;
 
       await prisma.contract.create({
         data: {
@@ -213,6 +216,7 @@ async function main() {
           customerId: customer.id,
           carId: car.id,
           status: rand(contractStatuses),
+          contractName,
           contractPrice: randInt(5000000, 50000000),
           resolutionDate: meetingDate,
           meetings: {

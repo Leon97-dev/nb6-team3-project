@@ -139,8 +139,9 @@ model Customer {
 model Contract {
   id             Int            @id @default(autoincrement())
   status         ContractStatus @default(CAR_INSPECTION)
-  contractPrice  Int
-  resolutionDate DateTime
+  contractName   String?
+  contractPrice  Int?
+  resolutionDate DateTime?
 
   // Relations
   companyId Int
