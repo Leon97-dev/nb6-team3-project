@@ -9,8 +9,14 @@ class ContractService {
     async register(contractData: ContractInterface.CreateContractPublic) {
         const companyId = await contractRepository.findCompanyIdByCarId(contractData.carId);
         if (!companyId) return new NotFoundError("차량에 등록된 회사Id를 찾을 수 없습니다.");
+        const carInfo = await contractRepository.findCarInfoByCarId(contractData.carId);
+        if (!carInfo) return new NotFoundError("잘못된 요청입니다.(carId)");
+        const customerInfo = await contractRepository.findCustomerInfoByCustomerId(contractData.carId);
+        if (!customerInfo) return new NotFoundError("잘못된 요청입니다.(customerId)");
+        const _contractName = `${carInfo.model} - ${customerInfo.name} 고객님`;
         const readyData: ContractInterface.CreateContract = {
             ...contractData,
+            contractName: _contractName,
             companyId: companyId.companyId,
             resolutionDate: new Date(),
         };
@@ -24,6 +30,13 @@ class ContractService {
             })),
         };
     }
+
+    async validateWriter(contractId: number, userId: number) {
+        const contract = await contractRepository.findById(contractId);
+        if (!contract) throw new NotFoundError("존재하지 않는 계약입니다.");
+        return contract.user?.id === userId;
+    }
+
     async findAll(searchBy: string, keyword: string) {
         const where: any = {};
         if (keyword) {

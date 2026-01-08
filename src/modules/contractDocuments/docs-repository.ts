@@ -39,7 +39,31 @@ class DocsRepository {
         ]);
         return { totalItemCount, contracts };
     }
-
+    async GetDraftList() {
+        const userdata = await prisma.contract.findMany({
+            where: {
+                status: "CONTRACT_SUCCESSFUL",
+            },
+            select: {
+                id: true,
+                contractName: true,
+            }
+        });
+        return userdata;
+    }
+    async UpLoad(data: Prisma.ContractDocumentUncheckedCreateInput) {
+        return await prisma.contractDocument.create({
+            data,
+            select: {
+                id: true,
+            },
+        });
+    }
+    async findById(id: number) {
+        return await prisma.contractDocument.findUnique({
+            where: { id },
+        });
+    }
 }
 const docsRepository = new DocsRepository();
 export default docsRepository;

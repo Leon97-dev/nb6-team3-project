@@ -100,12 +100,43 @@ class ContractRepository {
         });
     };
 
+    async findById(id: number) {
+        return await prisma.contract.findUnique({
+            where: { id },
+            select: {
+                id: true,
+                user: {
+                    select: { id: true }
+                }
+            }
+        });
+    }
     async findCompanyIdByCarId(carId: number) {
         const companyId = await prisma.car.findFirst({
             where: {
                 id: carId,
             }, select: {
                 companyId: true,
+            }
+        });
+        return companyId;
+    };
+    async findCarInfoByCarId(carId: number) {
+        const companyId = await prisma.car.findFirst({
+            where: {
+                id: carId,
+            }, select: {
+                model: true,
+            }
+        });
+        return companyId;
+    };
+    async findCustomerInfoByCustomerId(customerId: number) {
+        const companyId = await prisma.customer.findFirst({
+            where: {
+                id: customerId,
+            }, select: {
+                name: true,
             }
         });
         return companyId;
