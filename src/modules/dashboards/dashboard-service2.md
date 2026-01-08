@@ -1,22 +1,23 @@
-/**
- * @description 대시보드 서비스 모듈
- * 대시보드 관련 비즈니스 로직을 처리하는 기능을 제공합니다.
- * @author 정현준
- * @date 2026-01-07
- * @version 1.0
- **/
+/\*\*
+
+- @description 대시보드 서비스 모듈 2안
+- 대시보드 관련 비즈니스 로직을 처리하는 기능을 제공합니다.
+- @author 정현준
+- @date 2026-01-07
+- @version 1.0
+  \*\*/
 
 import { CarType, ContractStatus, type Contract } from '@prisma/client';
 import prisma from '../../configs/prisma.js';
 import { ValidationError } from '../../errors/error-handler.js';
 
 type ContractWithCar = Pick<Contract, 'status' | 'contractPrice'> & {
-  car: { carModel: { type: CarType } };
+car: { carModel: { type: CarType } };
 };
 
 export const dashboardService = {
-  async getDashboardStats(companyId: number) {
-    if (!companyId) throw new ValidationError('잘못된 요청입니다');
+async getDashboardStats(companyId: number) {
+if (!companyId) throw new ValidationError('잘못된 요청입니다');
 
     const now = new Date();
     const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
@@ -119,5 +120,6 @@ export const dashboardService = {
       proceedingContractsCount,
       completedContractsCount,
     };
-  },
+
+},
 };
