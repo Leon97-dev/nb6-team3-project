@@ -10,6 +10,7 @@ class ContractRepository {
                 contractPrice: data.contractPrice ?? null,
                 resolutionDate: data.resolutionDate ?? null,
                 companyId: data.companyId,
+                userId: data.userId,
                 carId: data.carId,
                 customerId: data.customerId,
                 meetings: {
@@ -53,7 +54,11 @@ class ContractRepository {
                 car: {
                     select: {
                         id: true,
-                        model: true,
+                        carModel: {
+                            select: {
+                                model: true,
+                            },
+                        },
                     },
                 },
             }
@@ -93,7 +98,11 @@ class ContractRepository {
                 car: {
                     select: {
                         id: true,
-                        model: true,
+                        carModel: {
+                            select: {
+                                model: true,
+                            },
+                        },
                     },
                 },
             }
@@ -126,7 +135,11 @@ class ContractRepository {
             where: {
                 id: carId,
             }, select: {
-                model: true,
+                carModel: {
+                    select: {
+                        model: true,
+                    },
+                },
             }
         });
         return companyId;
@@ -167,7 +180,11 @@ class ContractRepository {
             },
             select: {
                 id: true,
-                model: true,
+                carModel: {
+                    select: {
+                        model: true,
+                    },
+                },
                 carNumber: true
             }
         });

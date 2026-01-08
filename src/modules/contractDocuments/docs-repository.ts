@@ -51,7 +51,7 @@ class DocsRepository {
         });
         return userdata;
     }
-    async UpLoad(data: Prisma.ContractDocumentUncheckedCreateInput) {
+    async UpLoad(data: Prisma.ContractDocumentCreateInput) {
         return await prisma.contractDocument.create({
             data,
             select: {

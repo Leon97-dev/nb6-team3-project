@@ -89,7 +89,7 @@ export const dashboardService = {
 
       if (contract.status === successfulStatus) {
         salesByType[typeLabel] =
-          (salesByType[typeLabel] || 0) + contract.contractPrice || 0;
+          (salesByType[typeLabel] || 0) + (contract.contractPrice ?? 0);
       }
     });
 

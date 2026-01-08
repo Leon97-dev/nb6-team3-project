@@ -43,14 +43,20 @@ class DocsService {
         return data;
     }
 
-    async upload(file: { originalname: string; path: string; size: number; mimetype: string; }, userId: number) {
-        const { id } = await docsRepository.UpLoad({
+    async upload(
+        file: { originalname: string; path: string; size: number; mimetype: string; },
+        userId: number,
+        contractId: number
+    ) {
+        const data: Prisma.ContractDocumentCreateInput = {
             fileName: file.originalname,
             fileUrl: file.path,
             fileSize: file.size,
             contentType: file.mimetype,
-            uploadedByUserId: userId,
-        });
+            ...(userId && { uploadedByUser: { connect: { id: userId } } }),
+            contract: { connect: { id: contractId } },
+        };
+        const { id } = await docsRepository.UpLoad(data);
         return { contractDocumentId: id };
     }
 

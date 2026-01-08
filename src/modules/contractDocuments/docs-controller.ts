@@ -32,7 +32,13 @@ class ContractDocsController {
 
         const userId = (req as any).user?.id;
 
-        const result = await docsService.upload(file, userId);
+        const contractIdRaw = req.body?.contractId;
+        const contractId = Number(contractIdRaw);
+        if (!contractIdRaw || Number.isNaN(contractId)) {
+            throw new ValidationError('유효하지 않은 계약 ID입니다.');
+        }
+
+        const result = await docsService.upload(file, userId, contractId);
         return res.status(200).json(result);
     };
     DownLoad: RequestHandler = async (req, res, next) => {

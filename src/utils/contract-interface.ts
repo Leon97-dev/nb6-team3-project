@@ -5,6 +5,7 @@ interface CreateContract {
     contractPrice?: number | undefined;
     resolutionDate?: Date | undefined;
     companyId: number;
+    userId: number;
     carId: number;
     customerId: number;
     meetings: {
@@ -18,6 +19,7 @@ interface CreateContractPublic {
     contractPrice?: number | undefined;
     carId: number;
     customerId: number;
+    userId?: number | undefined;
     meetings: {
         date: Date;
         alarms: Date[];
@@ -39,6 +41,8 @@ interface PatchContract {
         id: number;
         fileName: string;
         fileUrl: string;
+        fileSize?: number;
+        contentType?: string;
     }[] | undefined;
 }
 
