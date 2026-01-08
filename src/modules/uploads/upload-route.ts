@@ -1,5 +1,5 @@
 /**
- * @description 이미지 업로드 라우터 모듈
+ * @description 이미지 업로드 라우터 모듈 최종 정리본
  * POST/api/upload 주소로 요청올 시, uploadController.upload 함수를 실행시키라고 연결해주는 역할
  * @author 정현준
  * @date 2026-01-08
