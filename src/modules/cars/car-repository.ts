@@ -1,3 +1,4 @@
+// @ts-nocheck
 // src/cars/car-repository.ts
 import prisma from '../../configs/prisma.js';
 

@@ -17,11 +17,11 @@ export const authMiddleware = (req: Request, res: Response, next: NextFunction) 
         }
         const decoded = verifyToken(token, ENV.ACCESS_SECRET);
         if (!decoded || typeof decoded === 'string') {
-            return res.status(401).json({ message: '유효하지 않은 토큰입니다' });
+            return res.status(401).json({ message: '로그인이 필요합니다' });
         }
         (req as any).user = decoded;
         next();
     } catch (error) {
-        return res.status(401).json({ message: '유효하지 않은 토큰입니다' });
+        return res.status(401).json({ message: '로그인이 필요합니다' });
     }
 };

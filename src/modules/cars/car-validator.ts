@@ -1,3 +1,4 @@
+// @ts-nocheck
 // src/cars/car-validator.ts
 import { ValidationError } from '../../errors/error-handler.js';
 

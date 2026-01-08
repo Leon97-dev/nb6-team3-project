@@ -1,0 +1,48 @@
+### 환경 설정
+@base = http://localhost:3000
+@random = {{$randomInt 1000 9999}}
+@email = auth_test_{{random}}@example.com
+@password = user1234
+
+### 회원가입
+# @name signup
+POST {{base}}/users
+Content-Type: application/json
+
+{
+  "name": "인증테스트유저",
+  "email": "{{email}}",
+  "employeeNumber": "TEST{{random}}",
+  "phoneNumber": "010-1111-{{random}}",
+  "password": "{{password}}",
+  "passwordConfirmation": "{{password}}",
+  "companyName": "테스트컴퍼니{{random}}",
+  "companyCode": "company{{random}}"
+}
+
+### 로그인
+# @name login
+POST {{base}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "{{signup.request.body.email}}",
+  "password": "{{password}}"
+}
+
+### 토큰 변수 획득 (로그인 응답값 참조)
+@accessToken = {{login.response.body.accessToken}}
+@refreshToken = {{login.response.body.refreshToken}}
+
+### 토큰 갱신
+POST {{base}}/auth/refresh
+Content-Type: application/json
+Authorization: Bearer {{refreshToken}}
+
+{
+  "refreshToken": "{{refreshToken}}"
+}
+
+### 로그아웃
+POST {{base}}/auth/logout
+Authorization: Bearer {{accessToken}}

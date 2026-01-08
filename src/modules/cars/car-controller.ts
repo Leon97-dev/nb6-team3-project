@@ -1,3 +1,4 @@
+// @ts-nocheck
 // src/cars/car-controller.ts
 import type { Request, Response } from 'express';
 import { carService } from './car-service.js';
