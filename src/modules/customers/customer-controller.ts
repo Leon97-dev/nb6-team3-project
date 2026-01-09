@@ -1,100 +1,127 @@
-import type { Request } from 'express';
-import { parse } from 'csv-parse/sync';
-import { validate, type Struct } from 'superstruct';
-import asyncHandler from '../../errors/async-handler.js';
-import {
-  UnauthorizedError,
-  ValidationError,
-} from '../../errors/error-handler.js';
-import { CustomerService } from './customer-service.js';
-import {
-  createCustomerSchema,
-  customerIdParamSchema,
-  listCustomersQuerySchema,
-  updateCustomerBodySchema,
-  type CreateCustomerBody,
-} from './customer-validator.js';
+import type { NextFunction, Request, Response } from 'express';
+import { ValidationError } from '../../errors/error-handler.js';
+import { customersService } from './customer-service.js';
 
-const parseStruct = <T, S>(schema: Struct<T, S>, value: unknown): T => {
-  const [error, result] = validate(value, schema);
-  if (error) {
-    throw new ValidationError(null, '잘못된 요청입니다');
+class CustomersController {
+  // 고객 등록
+  async create(
+    req: Request,
+    res: Response,
+    _next: NextFunction
+  ): Promise<void> {
+    const companyId = req.user!.companyId;
+    const data = req.body;
+
+    const customer = await customersService.createCustomer(companyId, data);
+
+    res.status(201).json(customer);
   }
-  return result;
-};
 
-const requireUser = (req: Request) => {
-  const user = req.user;
-  if (!user) {
-    throw new UnauthorizedError(null, '로그인이 필요합니다');
-  }
-  return user;
-};
+  // 고객 목록 조회
+  async findAll(
+    req: Request,
+    res: Response,
+    _next: NextFunction
+  ): Promise<void> {
+    const companyId = req.user!.companyId;
+    const { page, pageSize, searchBy, keyword } = req.query as {
+      page?: string;
+      pageSize?: string;
+      searchBy?: 'name' | 'email';
+      keyword?: string;
+    };
 
-export class CustomerController {
-  constructor(private service = new CustomerService()) {}
-
-  create = asyncHandler(async (req, res) => {
-    const user = requireUser(req);
-    const body = parseStruct(createCustomerSchema, req.body);
-    const data = await this.service.create(body, user.companyId);
-    res.status(201).json(data);
-  });
-
-  list = asyncHandler(async (req, res) => {
-    const user = requireUser(req);
-    const query = parseStruct(listCustomersQuerySchema, req.query);
-    const data = await this.service.list(query, user.companyId);
-    res.status(200).json(data);
-  });
-
-  get = asyncHandler(async (req, res) => {
-    const user = requireUser(req);
-    const { customerId } = parseStruct(customerIdParamSchema, req.params);
-    const data = await this.service.get(customerId, user.companyId);
-    res.status(200).json(data);
-  });
-
-  update = asyncHandler(async (req, res) => {
-    const user = requireUser(req);
-    const { customerId } = parseStruct(customerIdParamSchema, req.params);
-    const body = parseStruct(updateCustomerBodySchema, req.body);
-    const data = await this.service.update(customerId, body, user.companyId);
-    res.status(200).json(data);
-  });
-
-  delete = asyncHandler(async (req, res) => {
-    const user = requireUser(req);
-    const { customerId } = parseStruct(customerIdParamSchema, req.params);
-    await this.service.delete(customerId, user.companyId);
-    res.status(200).json({ message: '고객 삭제 성공' });
-  });
-
-  upload = asyncHandler(async (req, res) => {
-    const user = requireUser(req);
-    const file = (req as Request & { file?: Express.Multer.File }).file;
-    if (!file) {
-      throw new ValidationError(null, '잘못된 요청입니다');
-    }
-
-    const records = parse(file.buffer, {
-      columns: true,
-      skip_empty_lines: true,
-      trim: true,
-    }) as Record<string, string>[];
-
-    if (records.length === 0) {
-      throw new ValidationError(null, '잘못된 요청입니다');
-    }
-
-    const rows: CreateCustomerBody[] = records.map((record) =>
-      parseStruct(createCustomerSchema, record)
+    const result = await customersService.getCustomers(
+      companyId,
+      page as any,
+      pageSize as any,
+      searchBy,
+      keyword
     );
 
-    await this.service.upload(rows, user.companyId);
+    res.status(200).json(result);
+  }
+
+  // 고객 상세 조회
+  async findOne(
+    req: Request,
+    res: Response,
+    _next: NextFunction
+  ): Promise<void> {
+    const companyId = req.user!.companyId;
+    const customerId = Number(req.params.customerId);
+
+    if (Number.isNaN(customerId)) {
+      throw new ValidationError(null, '잘못된 요청입니다');
+    }
+
+    const customer = await customersService.getCustomerById(
+      companyId,
+      customerId
+    );
+
+    res.status(200).json(customer);
+  }
+
+  // 고객 수정
+  async update(
+    req: Request,
+    res: Response,
+    _next: NextFunction
+  ): Promise<void> {
+    const companyId = req.user!.companyId;
+    const customerId = Number(req.params.customerId);
+
+    if (Number.isNaN(customerId)) {
+      throw new ValidationError(null, '잘못된 요청입니다');
+    }
+
+    const data = req.body;
+
+    const updated = await customersService.updateCustomer(
+      companyId,
+      customerId,
+      data
+    );
+
+    res.status(200).json(updated);
+  }
+
+  // 고객 삭제
+  async delete(
+    req: Request,
+    res: Response,
+    _next: NextFunction
+  ): Promise<void> {
+    const companyId = req.user!.companyId;
+    const customerId = Number(req.params.customerId);
+
+    if (Number.isNaN(customerId)) {
+      throw new ValidationError(null, '잘못된 요청입니다');
+    }
+
+    await customersService.deleteCustomer(companyId, customerId);
+
+    res.status(200).json({ message: '고객 삭제 성공' });
+  }
+
+  // 고객 데이터 대용량 업로드
+  async upload(
+    req: Request,
+    res: Response,
+    _next: NextFunction
+  ): Promise<void> {
+    if (!req.file) {
+      throw new ValidationError(null, '잘못된 요청입니다');
+    }
+
+    const companyId = req.user!.companyId;
+    const filePath = req.file.path;
+
+    await customersService.bulkUpload(companyId, filePath);
+
     res.status(200).json({ message: '성공적으로 등록되었습니다' });
-  });
+  }
 }
 
-const customerController = new CustomerController();
-export default customerController;
+export default new CustomersController();

@@ -18,11 +18,6 @@ const requiredString = (message: string) =>
 
 const trimmedString = coerce(string(), string(), (value) => value.trim());
 
-const nonEmptyTrimmedString = refine(
-  trimmedString,
-  'nonEmpty',
-  (value) => value.length > 0
-);
 
 const emailString = refine(string(), 'email', (value) =>
   /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)
@@ -30,20 +25,18 @@ const emailString = refine(string(), 'email', (value) =>
     : 'email 형식이 올바르지 않습니다.'
 );
 
-const coercedNumber = coerce(
-  number(),
-  union([string(), number()]),
-  (value) => {
-    const parsed = typeof value === 'string' ? Number(value) : value;
-    return Number.isNaN(parsed) ? value : parsed;
-  }
-);
+const coercedNumber = coerce(number(), union([string(), number()]), (value) => {
+  const parsed = typeof value === 'string' ? Number(value) : value;
+  return Number.isNaN(parsed) ? value : parsed;
+});
 
 const intNumber = refine(coercedNumber, 'int', (value) =>
   Number.isInteger(value)
 );
 
 const positiveInt = refine(intNumber, 'positive', (value) => value > 0);
+
+const optionalKeyword = optional(trimmedString);
 
 export const GenderSchema = enums(['male', 'female']);
 
@@ -94,19 +87,12 @@ export const customerIdParamSchema = object({
   customerId: positiveInt,
 });
 
-export const listCustomersQuerySchema = refine(
-  object({
-    page: defaulted(positiveInt, 1),
-    pageSize: defaulted(max(positiveInt, 100), 10),
-    searchBy: optional(enums(['name', 'email'])),
-    keyword: optional(size(nonEmptyTrimmedString, 1, Infinity)),
-  }),
-  'searchByWithKeyword',
-  (value) =>
-    (value.searchBy && value.keyword) ||
-    (!value.searchBy && !value.keyword) ||
-    'searchBy와 keyword는 함께 사용해야 합니다.'
-);
+export const listCustomersQuerySchema = object({
+  page: defaulted(positiveInt, 1),
+  pageSize: defaulted(max(positiveInt, 100), 10),
+  searchBy: optional(enums(['name', 'email'])),
+  keyword: optionalKeyword,
+});
 
 export type CreateCustomerBody = Infer<typeof createCustomerSchema>;
 export type UpdateCustomerBody = Infer<typeof updateCustomerBodySchema>;

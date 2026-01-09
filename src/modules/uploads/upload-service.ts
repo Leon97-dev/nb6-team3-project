@@ -8,11 +8,11 @@ export const uploadService = {
     }
 
     const normalizedBaseUrl =
-      baseUrl && baseUrl.startsWith('http') ? `http://${baseUrl}` : baseUrl;
+      baseUrl && !baseUrl.startsWith('http') ? `http://${baseUrl}` : baseUrl;
     const prefix = normalizedBaseUrl
       ? normalizedBaseUrl.replace(/\/+$/, '')
       : '';
 
-    return `${prefix}/uploads/${file.filename}`;
+    return `${prefix}/upload/${file.filename}`;
   },
 };

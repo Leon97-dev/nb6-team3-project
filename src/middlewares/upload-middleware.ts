@@ -15,13 +15,22 @@ const storage = multer.diskStorage({
     },
     filename: (_req, file, cb) => {
      const ext = path.extname(file.originalname).toLowerCase();
-     const validExts = ['.png', '.jpg', '.jpeg', '.pdf' ].includes(ext) ? ext : '';
+     const validExts = ['.png', '.jpg', '.jpeg', '.pdf', '.csv' ].includes(ext) ? ext : '';
      cb(null, crypto.randomUUID() + validExts);
     },
 });
 
 const fileFilter = (_req: Express.Request, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
-const validTypes = ['image/png', 'image/jpg', 'image/jpeg', 'application/pdf'].includes(file.mimetype);
+const validTypes = [
+  'image/png',
+  'image/jpg',
+  'image/jpeg',
+  'application/pdf',
+  'text/csv',
+  'text/plain',
+  'application/csv',
+  'application/vnd.ms-excel',
+].includes(file.mimetype);
     if (validTypes) {
         cb(null, true);
     }else {

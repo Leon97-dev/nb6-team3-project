@@ -14,6 +14,22 @@ type ContractWithCar = Pick<Contract, 'status' | 'contractPrice'> & {
   car: { carModel: { type: CarType } };
 };
 
+const carTypeOrder: CarType[] = [
+  CarType.COMPACT,
+  CarType.MID_SIZE,
+  CarType.LARGE,
+  CarType.SPORTS_CAR,
+  CarType.SUV,
+];
+
+const carTypeLabels: Record<CarType, string> = {
+  [CarType.COMPACT]: '경·소형',
+  [CarType.MID_SIZE]: '준중·중형',
+  [CarType.LARGE]: '대형',
+  [CarType.SPORTS_CAR]: '스포츠카',
+  [CarType.SUV]: 'SUV',
+};
+
 export const dashboardService = {
   async getDashboardStats(companyId: number) {
     if (!companyId) {
@@ -80,32 +96,30 @@ export const dashboardService = {
       },
     })) as ContractWithCar[];
 
-    const contractTypeCounts: Record<string, number> = {};
-    const salesByType: Record<string, number> = {};
+    const contractTypeCounts: Record<CarType, number> = Object.fromEntries(
+      carTypeOrder.map((type) => [type, 0])
+    ) as Record<CarType, number>;
+    const salesByType: Record<CarType, number> = Object.fromEntries(
+      carTypeOrder.map((type) => [type, 0])
+    ) as Record<CarType, number>;
 
     contracts.forEach((contract) => {
       const typeLabel = contract.car.carModel.type;
-      contractTypeCounts[typeLabel] = (contractTypeCounts[typeLabel] || 0) + 1;
+      contractTypeCounts[typeLabel] += 1;
 
       if (contract.status === successfulStatus) {
-        salesByType[typeLabel] =
-          (salesByType[typeLabel] || 0) + (contract.contractPrice ?? 0);
+        salesByType[typeLabel] += contract.contractPrice ?? 0;
       }
     });
 
-    const uniqueTypes = new Set([
-      ...Object.keys(contractTypeCounts),
-      ...Object.keys(salesByType),
-    ]);
-
-    const contractsByCarType = Array.from(uniqueTypes).map((type) => ({
-      carType: type,
-      count: contractTypeCounts[type] || 0,
+    const contractsByCarType = carTypeOrder.map((type) => ({
+      carType: carTypeLabels[type],
+      count: contractTypeCounts[type],
     }));
 
-    const salesByCarType = Array.from(uniqueTypes).map((type) => ({
-      carType: type,
-      count: salesByType[type] || 0,
+    const salesByCarType = carTypeOrder.map((type) => ({
+      carType: carTypeLabels[type],
+      count: salesByType[type],
     }));
 
     return {

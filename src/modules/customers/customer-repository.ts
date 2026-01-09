@@ -1,97 +1,70 @@
+import type { Prisma } from '@prisma/client';
 import prisma from '../../configs/prisma.js';
-import type { Customer, Prisma } from '@prisma/client';
-import type { ListCustomersQuery } from './customer-validator.js';
 
-export class CustomerRepository {
-  async create(data: Prisma.CustomerCreateInput) {
+class CustomersRepository {
+  createCustomer(data: Prisma.CustomerCreateInput) {
     return prisma.customer.create({ data });
   }
-
-  async createMany(data: Prisma.CustomerCreateManyInput[]) {
-    return prisma.customer.createMany({ data });
+  
+  findCustomerByPhone(companyId: number, phoneNumber: string) {
+    return prisma.customer.findFirst({
+      where: { companyId, phoneNumber },
+    });
   }
 
-  async findById(customerId: number, companyId: number) {
+  getCustomerList(
+    where: Prisma.CustomerWhereInput,
+    skip: number,
+    take: number
+  ) {
+    return prisma.customer.findMany({
+      where,
+      skip,
+      take,
+      orderBy: { id: 'desc' },
+      include: { contracts: true },
+    });
+  }
+
+  countCustomers(where: Prisma.CustomerWhereInput) {
+    return prisma.customer.count({ where });
+  }
+
+  findCustomerById(companyId: number, customerId: number) {
     return prisma.customer.findFirst({
       where: { id: customerId, companyId },
+      include: { contracts: true },
     });
   }
 
-  async findByPhoneNumber(
-    companyId: number,
-    phoneNumber: string,
-    excludeCustomerId?: number
-  ) {
-    return prisma.customer.findFirst({
-      where: {
-        companyId,
-        phoneNumber,
-        ...(excludeCustomerId ? { id: { not: excludeCustomerId } } : {}),
-      },
-    });
-  }
-
-  async findByEmail(
-    companyId: number,
-    email: string,
-    excludeCustomerId?: number
-  ) {
-    return prisma.customer.findFirst({
-      where: {
-        companyId,
-        email,
-        ...(excludeCustomerId ? { id: { not: excludeCustomerId } } : {}),
-      },
-    });
-  }
-
-  async update(customerId: number, data: Prisma.CustomerUpdateInput) {
+  updateCustomer(customerId: number, data: Prisma.CustomerUpdateInput) {
     return prisma.customer.update({
       where: { id: customerId },
       data,
     });
   }
 
-  async delete(customerId: number) {
+  deleteCustomer(customerId: number) {
     return prisma.customer.delete({
       where: { id: customerId },
     });
   }
 
-  async list(
-    query: ListCustomersQuery,
-    companyId: number
-  ): Promise<{ items: Customer[]; total: number }> {
-    const { page, pageSize, searchBy, keyword } = query;
-    const skip = (page - 1) * pageSize;
+  countContracts(customerId: number) {
+    return prisma.contract.count({
+      where: { customerId },
+    });
+  }
 
-    const where: Prisma.CustomerWhereInput = {
-      companyId,
-      ...(searchBy && keyword
-        ? {
-            [searchBy]: {
-              contains: keyword,
-              mode: 'insensitive',
-            },
-          }
-        : {}),
-    };
-
-    const findArgs: Prisma.CustomerFindManyArgs = {
-      skip,
-      take: pageSize,
-      orderBy: { id: 'desc' },
-      where,
-    };
-    const countArgs: Prisma.CustomerCountArgs = {
-      where,
-    };
-
-    const [items, total] = await prisma.$transaction([
-      prisma.customer.findMany(findArgs),
-      prisma.customer.count(countArgs),
-    ]);
-
-    return { items, total };
+  bulkCreateCustomers(dataArray: Prisma.CustomerCreateManyInput[]) {
+    return prisma.$transaction(
+      dataArray.map((data) =>
+        prisma.customer.create({
+          data,
+        })
+      )
+    );
   }
 }
+
+export const customersRepository = new CustomersRepository();

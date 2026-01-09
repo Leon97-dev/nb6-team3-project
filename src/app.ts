@@ -28,7 +28,6 @@ import carRoutes from './modules/cars/car-route.js';
 import contractDocsRouter from './modules/contractDocuments/docs-route.js';
 import contractRouter from './modules/contracts/contract-route.js';
 
-
 // ============================================
 // 환경 변수 설정
 // ============================================
@@ -55,7 +54,9 @@ app.use('/customers', customerRoutes);
 app.use('/auth', authRoutes);
 app.use('/users', userRoutes);
 app.use('/uploads', uploadRoutes);
+app.use('/images', uploadRoutes);
 app.use('/dashboards', dashboardRoutes);
+app.use('/dashboard', dashboardRoutes);
 app.use('/companies', companyRoutes);
 app.use('/cars', carRoutes);
 app.use('/contracts', contractRouter);
