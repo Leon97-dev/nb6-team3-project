@@ -18,6 +18,7 @@ export type DropdownProps<T> = {
   onSelect: (data: T, text: string) => void
   hasSearch?: boolean
   searchInputPlaceholder?: string
+  onSearchChange?: (keyword: string) => void
 }
 const Dropdown = <T extends string | number>({
   type,
@@ -27,6 +28,7 @@ const Dropdown = <T extends string | number>({
   onSelect,
   hasSearch = false,
   searchInputPlaceholder,
+  onSearchChange,
 }: DropdownProps<T>) => {
   const selectedFilter = filters.find((filter) => filter.data === currentData)
 
@@ -65,6 +67,7 @@ const Dropdown = <T extends string | number>({
           hasSearch={hasSearch}
           ref={popoverRef}
           searchInputPlaceholder={searchInputPlaceholder}
+          onSearchChange={onSearchChange}
         />
       </div>
     </div>
