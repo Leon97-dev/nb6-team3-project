@@ -1,7 +1,7 @@
 import { Prisma } from '@prisma/client';
 import docsRepository from './docs-repository.js';
 import prisma from '../../configs/prisma.js';
-import { ValidationError } from '../../errors/error-handler.js';
+import { NotFoundError, ValidationError } from './../../errors/error-handler.js';
 
 class DocsService {
     async findAll(page: number = 1, pageSize: number = 10, searchBy: string = "", keyword: string = "") {
@@ -34,8 +34,11 @@ class DocsService {
             data,
         };
     }
-    async GetDraftList() {
-        const userlist = await docsRepository.GetDraftList();
+    async GetDraftList(userId: number) {
+        const companyCode = await docsRepository.GetCompanyCode(userId);
+        if (!companyCode) throw new NotFoundError("사용자의 회사 정보를 찾을 수 없습니다.");
+        const where: any = { status: "CONTRACT_SUCCESSFUL", company: { companyCode } };
+        const userlist = await docsRepository.GetDraftList(where);
         const data = userlist.map((user) => ({
             id: user.id,
             data: user.contractName,

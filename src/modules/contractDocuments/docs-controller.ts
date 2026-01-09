@@ -21,7 +21,10 @@ class ContractDocsController {
         return res.status(200).json(docsList);
     };
     GetDraft: RequestHandler = async (req, res, next) => {
-        const draftList = await docsService.GetDraftList();
+
+        const userId = (req as any).user?.id;
+        if (!userId) return new ValidationError('잘못된 요청입니다.(userId)');
+        const draftList = await docsService.GetDraftList(userId);
         return res.status(200).json(draftList);
     };
     UpLoad: RequestHandler = async (req, res, next) => {

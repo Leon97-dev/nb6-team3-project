@@ -157,7 +157,30 @@ class ContractService {
         const patchedData = await contractRepository.patchContract(id, updateData);
         if (!patchedData) return new NotFoundError("존재하지 않는 계약입니다");
 
-        return patchedData;
+        const dbStatusToFrontendMap: Record<string, string> = {
+            CAR_INSPECTION: 'carInspection',
+            PRICE_NEGOTIATION: 'priceNegotiation',
+            CONTRACT_DRAFT: 'contractDraft',
+            CONTRACT_SUCCESSFUL: 'contractSuccessful',
+            CONTRACT_FAILED: 'contractFailed',
+        };
+
+        return {
+            id: patchedData.id,
+            status: dbStatusToFrontendMap[patchedData.status] ?? patchedData.status,
+            resolutionDate: patchedData.resolutionDate,
+            contractPrice: patchedData.contractPrice,
+            meetings: patchedData.meetings.map((meeting) => ({
+                date: meeting.date,
+                alarms: meeting.alarms.map((alarm) => alarm.alarmAt)
+            })),
+            user: patchedData.user,
+            customer: patchedData.customer,
+            car: patchedData.car ? {
+                id: patchedData.car.id,
+                model: patchedData.car.carModel?.model ?? null
+            } : null
+        };
     }
     async deleteContract(id: number) {
         const deletedContract = await contractRepository.deleteContract(id);

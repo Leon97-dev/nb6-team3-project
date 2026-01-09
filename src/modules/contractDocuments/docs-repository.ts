@@ -39,17 +39,28 @@ class DocsRepository {
         ]);
         return { totalItemCount, contracts };
     }
-    async GetDraftList() {
+    async GetDraftList(where: Prisma.ContractWhereInput) {
         const userdata = await prisma.contract.findMany({
-            where: {
-                status: "CONTRACT_SUCCESSFUL",
-            },
+            where,
             select: {
                 id: true,
                 contractName: true,
             }
         });
         return userdata;
+    }
+    async GetCompanyCode(userId: number) {
+        const user = await prisma.user.findUnique({
+            where: { id: userId },
+            select: {
+                company: {
+                    select: {
+                        companyCode: true
+                    }
+                },
+            }
+        });
+        return user?.company?.companyCode;
     }
     async UpLoad(data: Prisma.ContractDocumentCreateInput) {
         return await prisma.contractDocument.create({
