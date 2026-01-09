@@ -40,8 +40,11 @@ class ContractService {
         return contract.user?.id === userId;
     }
 
-    async findAll(searchBy: string, keyword: string) {
-        const where: any = {};
+    async findAll(userId: number, searchBy: string, keyword: string) {
+        const companyCode = await contractRepository.findCompanyIdByUserId(userId);
+        if (!companyCode) throw new NotFoundError("사용자의 회사 정보를 찾을 수 없습니다.");
+
+        const where: any = { company: { companyCode } };
         if (keyword) {
             if (searchBy === "customerName") {
                 where.customer = { name: { contains: keyword } };

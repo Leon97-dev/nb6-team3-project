@@ -23,6 +23,9 @@ class ContractController {
 
   findAll: RequestHandler = async (req, res) => {
     const { searchBy, keyword } = req.query;
+    const userId = (req as any).user?.id;
+    if (!userId) return new ValidationError('잘못된 요청입니다.(userId)');
+
     // if(!searchBy || !keyword) return new ValidationError("잘못된 요청입니다.");
     if (searchBy) {
       if (searchBy === 'customerName' || searchBy === 'userName') {
@@ -31,6 +34,7 @@ class ContractController {
       }
     }
     const contracts = await contractService.findAll(
+      userId,
       searchBy as string,
       keyword as string
     );
@@ -68,7 +72,7 @@ class ContractController {
     }
 
     await contractService.deleteContract(contractId);
-    return res.status(204).send();
+    return res.status(200).json({ message: '계약 삭제 성공' });
   };
   findCarList: RequestHandler = async (req, res) => {
     const carList = await contractService.findCarList();
