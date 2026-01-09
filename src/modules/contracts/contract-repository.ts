@@ -140,6 +140,7 @@ class ContractRepository {
                         model: true,
                     },
                 },
+                price: true,
             }
         });
         return companyId;

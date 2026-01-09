@@ -14,9 +14,11 @@ class ContractService {
         const customerInfo = await contractRepository.findCustomerInfoByCustomerId(contractData.customerId);
         if (!customerInfo) return new NotFoundError("잘못된 요청입니다.(customerId)");
         const _contractName = `${carInfo.carModel?.model ?? '차량'} - ${customerInfo.name} 고객님`;
+        const _contractPrice = carInfo.price;
         const readyData: ContractInterface.CreateContract = {
             ...contractData,
             contractName: _contractName,
+            contractPrice: _contractPrice,
             companyId: companyId.companyId,
             resolutionDate: new Date(),
             userId: contractData.userId as number,
