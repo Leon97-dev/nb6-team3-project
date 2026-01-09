@@ -164,8 +164,11 @@ class ContractService {
         if (!deletedContract) return new NotFoundError("존재하지 않는 계약입니다.");
         return deletedContract;
     }
-    async findCarList() {
-        const carList = await contractRepository.findCarList();
+    async findCarList(id: number) {
+        const companyCode = await contractRepository.findCompanyIdByUserId(id);
+        if (!companyCode) throw new NotFoundError("사용자의 회사 정보를 찾을 수 없습니다.");
+        const where: any = { status: "POSSESSION", company: { companyCode } };
+        const carList = await contractRepository.findCarList(where);
         if (!carList) throw new ValidationError("잘못된 요청입니다.");
         const cars = carList.map((car) => ({
             id: car.id,
@@ -173,8 +176,12 @@ class ContractService {
         }));
         return cars;
     }
-    async findCustomerList() {
-        const customerList = await contractRepository.findCustomerList();
+    async findCustomerList(id: number) {
+        const companyCode = await contractRepository.findCompanyIdByUserId(id);
+        if (!companyCode) throw new NotFoundError("사용자의 회사 정보를 찾을 수 없습니다.");
+
+        const where: any = { company: { companyCode } };
+        const customerList = await contractRepository.findCustomerList(where);
         if (!customerList) throw new ValidationError("잘못된 요청입니다.");
         const customers = customerList.map((data) => ({
             id: data.id,
@@ -182,8 +189,12 @@ class ContractService {
         }));
         return customers;
     }
-    async findUserList() {
-        const userList = await contractRepository.findUserList();
+    async findUserList(id: number) {
+        const companyCode = await contractRepository.findCompanyIdByUserId(id);
+        if (!companyCode) throw new NotFoundError("사용자의 회사 정보를 찾을 수 없습니다.");
+
+        const where: any = { company: { companyCode } };
+        const userList = await contractRepository.findUserList(where);
         if (!userList) throw new ValidationError("잘못된 요청입니다.");
         const users = userList.map((data) => ({
             id: data.id,

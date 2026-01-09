@@ -187,11 +187,9 @@ class ContractRepository {
     }
     //Todo - 차량 계약 관련 api 병합시 status 가 POSSESSION인지,
     //       차량 모델관련 변수가 model이 맞는지 추가 확인 필요
-    async findCarList() {
+    async findCarList(where: Prisma.CarWhereInput) {
         return await prisma.car.findMany({
-            where: {
-                status: "POSSESSION"
-            },
+            where,
             select: {
                 id: true,
                 carModel: {
@@ -203,8 +201,9 @@ class ContractRepository {
             }
         });
     }
-    async findCustomerList() {
+    async findCustomerList(where: Prisma.CustomerWhereInput) {
         return await prisma.customer.findMany({
+            where,
             select: {
                 id: true,
                 name: true,
@@ -212,8 +211,9 @@ class ContractRepository {
             }
         });
     }
-    async findUserList() {
+    async findUserList(where: Prisma.UserWhereInput) {
         return await prisma.user.findMany({
+            where,
             select: {
                 id: true,
                 name: true,

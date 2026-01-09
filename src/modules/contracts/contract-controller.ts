@@ -75,15 +75,21 @@ class ContractController {
     return res.status(200).json({ message: '계약 삭제 성공' });
   };
   findCarList: RequestHandler = async (req, res) => {
-    const carList = await contractService.findCarList();
+    const userId = (req as any).user?.id;
+    if (!userId) return new ValidationError('잘못된 요청입니다.(userId)');
+    const carList = await contractService.findCarList(userId);
     return res.status(200).json(carList);
   };
   findCustomerList: RequestHandler = async (req, res) => {
-    const customerList = await contractService.findCustomerList();
+    const userId = (req as any).user?.id;
+    if (!userId) return new ValidationError('잘못된 요청입니다.(userId)');
+    const customerList = await contractService.findCustomerList(userId);
     return res.status(200).json(customerList);
   };
   findUserList: RequestHandler = async (req, res) => {
-    const userList = await contractService.findUserList();
+    const userId = (req as any).user?.id;
+    if (!userId) return new ValidationError('잘못된 요청입니다.(userId)');
+    const userList = await contractService.findUserList(userId);
     return res.status(200).json(userList);
   };
 }
