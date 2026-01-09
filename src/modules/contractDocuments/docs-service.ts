@@ -48,19 +48,22 @@ class DocsService {
 
     async upload(
         file: { originalname: string; path: string; size: number; mimetype: string; },
-        userId: number,
-        contractId: number
+        userId: number
     ) {
+        const contractIdRaw = await docsRepository.findContractIdByUserId(userId);
+        if (!contractIdRaw) {
+            throw new ValidationError('계약 ID를 찾을 수 없습니다.');
+        }
         const data: Prisma.ContractDocumentCreateInput = {
             fileName: file.originalname,
             fileUrl: file.path,
             fileSize: file.size,
             contentType: file.mimetype,
             ...(userId && { uploadedByUser: { connect: { id: userId } } }),
-            contract: { connect: { id: contractId } },
+            contract: { connect: { id: contractIdRaw } },
         };
-        const { id } = await docsRepository.UpLoad(data);
-        return { contractDocumentId: id };
+        const document = await docsRepository.UpLoad(data);
+        return document;
     }
 
     async download(id: number) {

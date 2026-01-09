@@ -31,6 +31,9 @@ class DocsRepository {
                         select: {
                             id: true,
                             fileName: true,
+                            fileUrl: true,
+                            fileSize: true,
+                            contentType: true,
                         }
                     }
 
@@ -49,6 +52,16 @@ class DocsRepository {
         });
         return userdata;
     }
+    async findContractIdByUserId(userId: number) {
+        const contractId = await prisma.contract.findFirst({
+            where: {
+                userId: userId,
+            }, select: {
+                id: true,
+            }
+        });
+        return contractId?.id;
+    }
     async GetCompanyCode(userId: number) {
         const user = await prisma.user.findUnique({
             where: { id: userId },
@@ -65,9 +78,6 @@ class DocsRepository {
     async UpLoad(data: Prisma.ContractDocumentCreateInput) {
         return await prisma.contractDocument.create({
             data,
-            select: {
-                id: true,
-            },
         });
     }
     async findById(id: number) {

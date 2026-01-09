@@ -21,7 +21,6 @@ class ContractDocsController {
         return res.status(200).json(docsList);
     };
     GetDraft: RequestHandler = async (req, res, next) => {
-
         const userId = (req as any).user?.id;
         if (!userId) return new ValidationError('잘못된 요청입니다.(userId)');
         const draftList = await docsService.GetDraftList(userId);
@@ -35,13 +34,8 @@ class ContractDocsController {
 
         const userId = (req as any).user?.id;
 
-        const contractIdRaw = req.body?.contractId;
-        const contractId = Number(contractIdRaw);
-        if (!contractIdRaw || Number.isNaN(contractId)) {
-            throw new ValidationError('유효하지 않은 계약 ID입니다.');
-        }
 
-        const result = await docsService.upload(file, userId, contractId);
+        const result = await docsService.upload(file, userId);
         return res.status(200).json(result);
     };
     DownLoad: RequestHandler = async (req, res, next) => {
