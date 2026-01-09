@@ -317,8 +317,12 @@ export const getCarsForContract = async () => {
   return response.data
 }
 
-export const getCustomersForContract = async () => {
-  const response = await axios.get<ItemForDropdown[]>('/contracts/customers')
+export const getCustomersForContract = async (keyword = '') => {
+  const response = await axios.get<ItemForDropdown[]>('/contracts/customers', {
+    params: {
+      keyword,
+    },
+  })
   return response.data
 }
 

@@ -10,6 +10,7 @@ import useCustomersForContract from '../data-access-items-for-contract/useCustom
 import MeetingsConnect from '@ui/shared/form-field/MeetingsConnect/MeetingsConnect'
 import { v4 as uuidv4 } from 'uuid'
 import useUsersForContract from '../data-access-items-for-contract/useUsersForContract'
+import { useState } from 'react'
 
 const cx = classNames.bind(styles)
 
@@ -28,8 +29,9 @@ const ContractForm = ({ onSubmit, onCancel, defaultValues }: ContractFormProps) 
   })
   const { handleSubmit } = methods
 
+  const [customerSearchKeyword, setCustomerSearchKeyword] = useState('')
   const { data: carsForContractData = [] } = useCarsForContract(defaultValues?.carId)
-  const { data: customersForContractData = [] } = useCustomersForContract()
+  const { data: customersForContractData = [] } = useCustomersForContract(customerSearchKeyword)
   const { data: usersForContractData = [] } = useUsersForContract()
 
   return (
@@ -60,6 +62,7 @@ const ContractForm = ({ onSubmit, onCancel, defaultValues }: ContractFormProps) 
               }}
               hasSearch
               searchInputPlaceholder='고객을 검색해주세요'
+              onSearchChange={setCustomerSearchKeyword}
             />
           </div>
           {defaultValues && (
