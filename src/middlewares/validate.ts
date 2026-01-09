@@ -29,7 +29,9 @@ export const validate =
           : req.params;
 
     try {
-      const [error, result] = superstructValidate(data, schema);
+      const [error, result] = superstructValidate(data, schema, {
+        coerce: true,
+      });
       if (error) {
         throw error;
       }

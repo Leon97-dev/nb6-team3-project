@@ -1,6 +1,6 @@
 import classNames from 'classnames/bind'
 import styles from './PopoverMenus.module.scss'
-import { forwardRef, useState } from 'react'
+import { forwardRef, useMemo, useState, useEffect } from 'react'
 import TextField from '../input/TextField/TextField'
 import Icon from '../icon/Icon'
 import debounce from 'debounce'
@@ -14,11 +14,37 @@ type PopoverMenusProps = {
   }[]
   hasSearch?: boolean
   searchInputPlaceholder?: string
+  onSearchChange?: (keyword: string) => void
 }
 
-const PopoverMenus = forwardRef<HTMLDialogElement, PopoverMenusProps>(({ items, hasSearch = false, searchInputPlaceholder }, ref) => {
+const PopoverMenus = forwardRef<HTMLDialogElement, PopoverMenusProps>(({
+  items,
+  hasSearch = false,
+  searchInputPlaceholder,
+  onSearchChange,
+}, ref) => {
   const [searchKeyword, setSearchKeyword] = useState('')
-  const searchItems = hasSearch ? items.filter(({ text }) => text?.toString().includes(searchKeyword)) : items
+  const debouncedSearch = useMemo(
+    () =>
+      debounce((value: string) => {
+        setSearchKeyword(value)
+        if (onSearchChange) {
+          onSearchChange(value)
+        }
+      }, 300),
+    [onSearchChange],
+  )
+
+  useEffect(
+    () => () => {
+      debouncedSearch.clear()
+    },
+    [debouncedSearch],
+  )
+
+  const searchItems = hasSearch && !onSearchChange
+    ? items.filter(({ text }) => text?.toString().includes(searchKeyword))
+    : items
 
   return (
     <dialog className={cx('popup', { hasSearch })} ref={ref}>
@@ -29,7 +55,7 @@ const PopoverMenus = forwardRef<HTMLDialogElement, PopoverMenusProps>(({ items, 
             height='40px'
             rightIcon={<Icon name='search' width={24} height={24} />}
             className='dropdownInput'
-            onChange={debounce((e) => { setSearchKeyword(e.target.value) }, 300)}
+            onChange={(e) => debouncedSearch(e.target.value)}
           />
         </div>
       )}

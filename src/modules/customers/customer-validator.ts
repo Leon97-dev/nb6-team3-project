@@ -8,7 +8,7 @@ import {
   object,
   optional,
   refine,
-  size,
+  size, 
   string,
   union,
 } from 'superstruct';
