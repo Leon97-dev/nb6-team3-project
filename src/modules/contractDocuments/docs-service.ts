@@ -42,7 +42,7 @@ class DocsService {
     async GetDraftList(userId: number) {
         const companyCode = await docsRepository.GetCompanyCode(userId);
         if (!companyCode) throw new NotFoundError("사용자의 회사 정보를 찾을 수 없습니다.");
-        const where: any = { status: "CONTRACT_SUCCESSFUL", company: { companyCode } };
+        const where: any = { status: "CONTRACT_SUCCESSFUL", company: { companyCode }, userId };
         const userlist = await docsRepository.GetDraftList(where);
         const data = userlist.map((user) => ({
             id: user.id,

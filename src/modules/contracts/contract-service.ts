@@ -148,7 +148,7 @@ class ContractService {
                 deleteMany: {}, // 기존 문서 연결/데이터 삭제
                 create: contractDocuments.map((doc) => ({
                     fileName: doc.fileName,
-                    fileUrl: doc.fileUrl,
+                    fileUrl: doc.fileUrl ?? "",
                     fileSize: doc.fileSize ?? 0,
                     contentType: doc.contentType ?? 'application/octet-stream',
                 }))

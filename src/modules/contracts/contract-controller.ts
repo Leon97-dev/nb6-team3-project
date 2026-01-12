@@ -56,6 +56,7 @@ class ContractController {
       req.body.contractDocuments = req.body.contractDocuments.map((doc: any) => ({
         ...doc,
         id: doc.id ?? 0,
+        fileUrl: doc.fileUrl ?? "",
       }));
     }
 
