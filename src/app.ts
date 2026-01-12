@@ -11,8 +11,11 @@ import cors from 'cors';
 import helmet from 'helmet';
 import compression from 'compression';
 import dotenv from 'dotenv';
+import swaggerUi from 'swagger-ui-express';
+import { specs } from './configs/swagger.js';
 import { notFoundHandler, errorHandler } from './errors/error-handler.js';
 import { debugLog } from './errors/debug.js';
+
 
 // ============================================
 // 라우터 import (여기에 추가 하세요!)
@@ -45,6 +48,10 @@ app.use(helmet());
 app.use(compression());
 app.use(express.json());
 app.use('/upload', express.static('public/uploads'));
+
+// Swagger UI 연결
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
+
 
 // ============================================
 // 라우터 등록 (여기에 추가 하세요!)
