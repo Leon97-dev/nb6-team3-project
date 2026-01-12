@@ -5,6 +5,7 @@ import {
   mapCarStatusToApi,
 } from './car-service.js';
 import type { GetCarsQuery, CarListQuery } from '../../types/car.d.js';
+import { CAR_TYPE_LABEL_MAP } from '../../utils/enum-mapper.js';
 
 export class CarController {
   // 차량 목록 조회
@@ -71,7 +72,7 @@ export class CarController {
         carNumber: car.carNumber,
         manufacturer: car.carModel.manufacturer,
         model: car.carModel.model,
-        type: car.carModel.type,
+        type: CAR_TYPE_LABEL_MAP[car.carModel.type],
         manufacturingYear: car.manufacturingYear,
         mileage: car.mileage,
         price: car.price,

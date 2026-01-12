@@ -40,15 +40,22 @@ export class CarService {
   static async getOrCreateCarModel(
     manufacturer: string,
     model: string,
-    type: CarType
+    type: string
   ) {
+    const carType = Object.entries(CAR_TYPE_LABEL_MAP).find(
+      ([, label]) => label === type
+    )?.[0] as CarType | undefined;
+
+    if (!carType) {
+      throw new ValidationError('잘못된 요청입니다');
+    }
     return prisma.carModel.upsert({
       where: { manufacturer_model: { manufacturer, model } },
       update: {},
       create: {
         manufacturer,
         model,
-        type: type as CarType,
+        type: carType,
       },
     });
   }
