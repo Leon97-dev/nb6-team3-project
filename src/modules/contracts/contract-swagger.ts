@@ -163,7 +163,7 @@
  *                     model:
  *                       type: string
  *       400:
- *         description: 실패
+ *         description: 잘못된 요청입니다
  *         content:
  *           application/json:
  *             schema:
