@@ -125,7 +125,7 @@ export class CarService {
         accidentCount: car.accidentCount,
         explanation: car.explanation,
         accidentDetails: car.accidentDetails,
-        status: car.status,
+        status: mapCarStatusToApi(car.status),
       })),
     };
   }
