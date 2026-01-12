@@ -1,4 +1,5 @@
 import { RequestHandler } from 'express';
+import path from 'path';
 import * as s from 'superstruct';
 import { ValidationError } from '../../errors/error-handler.js';
 import { GetDocsListParams } from '../../utils/docs-struct.js';
@@ -47,7 +48,10 @@ class ContractDocsController {
             throw new ValidationError('유효하지 않은 ID입니다.');
         }
         const document = await docsService.download(documentId);
-        return res.download(document.fileUrl, document.fileName);
+
+        const filePath = path.resolve(document.fileUrl);
+        res.setHeader('Content-Type', document.contentType);
+        return res.download(filePath, document.fileName);
     };
 
 
