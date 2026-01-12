@@ -9,6 +9,8 @@ import docsService from './docs-service.js';
 
 class ContractDocsController {
     GetList: RequestHandler = async (req, res, next) => {
+        const userId = (req as any).user?.id;
+
         let query;
         try {
             query = s.create(req.query, GetDocsListParams);
@@ -17,7 +19,7 @@ class ContractDocsController {
         }
         const { page, pageSize, searchBy, keyword } = query;
 
-        const docsList = await docsService.findAll(page, pageSize, searchBy, keyword);
+        const docsList = await docsService.findAll(userId, page, pageSize, searchBy, keyword);
         return res.status(200).json(docsList);
     };
     GetDraft: RequestHandler = async (req, res, next) => {

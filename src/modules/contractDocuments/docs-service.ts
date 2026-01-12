@@ -4,8 +4,13 @@ import prisma from '../../configs/prisma.js';
 import { NotFoundError, ValidationError } from './../../errors/error-handler.js';
 
 class DocsService {
-    async findAll(page: number = 1, pageSize: number = 10, searchBy: string = "", keyword: string = "") {
-        const where: Prisma.ContractWhereInput = {};
+    async findAll(userId: number, page: number = 1, pageSize: number = 10, searchBy: string = "", keyword: string = "") {
+
+
+        const companyCode = await docsRepository.GetCompanyCode(userId);
+        if (!companyCode) throw new NotFoundError("사용자의 회사 정보를 찾을 수 없습니다.");
+
+        const where: Prisma.ContractWhereInput = { company: { companyCode } };
         if (keyword) {
             if (searchBy === 'contractName') {
                 where.contractName = { contains: keyword };

@@ -85,6 +85,7 @@ class DocsRepository {
             where: { id },
         });
     }
+
 }
 const docsRepository = new DocsRepository();
 export default docsRepository;
