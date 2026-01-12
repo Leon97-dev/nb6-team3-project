@@ -17,13 +17,13 @@ router.post(
   upload.single('file'),
   CarController.Upload
 );
+//차량 모델 목록 조회
+router.get('/models', requireAuth, CarController.models);
 // 차량 상세 조회
 router.get('/:carId', requireAuth, CarController.detail);
 // 차량 수정
 router.patch('/:carId', requireAuth, CarController.update);
 // 차량 삭제
 router.delete('/:carId', requireAuth, CarController.delete);
-//차량 모델 목록 조회
-router.get('/models', requireAuth, CarController.models);
 
 export default router;
