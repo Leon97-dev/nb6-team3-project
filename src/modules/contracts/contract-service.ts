@@ -3,6 +3,7 @@ import contractRepository from './contract-repository.js';
 import * as ContractInterface from '../../utils/contract-interface.js';
 import { NotFoundError, ValidationError } from './../../errors/error-handler.js';
 import { Prisma } from '@prisma/client';
+import { CONTRACT_STATUS_API_TO_DB, CONTRACT_STATUS_DB_TO_API } from '../../utils/enum-mapper.js';
 
 
 class ContractService {
@@ -55,14 +56,6 @@ class ContractService {
 
         const contracts = await contractRepository.findAll(where);
 
-        const statusKeyMap: Record<string, string> = {
-            CAR_INSPECTION: 'carInspection',
-            PRICE_NEGOTIATION: 'priceNegotiation',
-            CONTRACT_DRAFT: 'contractDraft',
-            CONTRACT_SUCCESSFUL: 'contractSuccessful',
-            CONTRACT_FAILED: 'contractFailed',
-        };
-
         const groupedContracts: Record<string, any> = {
             carInspection: { totalItemCount: 0, data: [] },
             priceNegotiation: { totalItemCount: 0, data: [] },
@@ -73,7 +66,7 @@ class ContractService {
 
         // status를 기준으로 그룹화하여 반환 형식에 맞게 변환
         const mergedContracts = contracts.reduce((acc: Record<string, any>, contract) => {
-            const statusKey = statusKeyMap[contract.status] ?? contract.status; // DB의 status 값을 키로 사용
+            const statusKey = CONTRACT_STATUS_DB_TO_API[contract.status] ?? contract.status; // DB의 status 값을 키로 사용
 
             if (!acc[statusKey]) {
                 acc[statusKey] = {
@@ -106,19 +99,12 @@ class ContractService {
 
     async patchContract(id: number, data: ContractInterface.PatchContract) {
         const { meetings, contractDocuments, ...rest } = data;
-        const statusKeyMap: Record<string, ContractInterface.ContractStatus> = {
-            carInspection: ContractInterface.ContractStatus.CAR_INSPECTION,
-            priceNegotiation: ContractInterface.ContractStatus.PRICE_NEGOTIATION,
-            contractDraft: ContractInterface.ContractStatus.CONTRACT_DRAFT,
-            contractSuccessful: ContractInterface.ContractStatus.CONTRACT_SUCCESSFUL,
-            contractFailed: ContractInterface.ContractStatus.CONTRACT_FAILED,
-        };
 
         const normalizedRest = {
             ...rest,
             status:
                 rest.status && typeof rest.status === 'string'
-                    ? statusKeyMap[rest.status] ?? rest.status
+                    ? CONTRACT_STATUS_API_TO_DB[rest.status as keyof typeof CONTRACT_STATUS_API_TO_DB] ?? rest.status
                     : rest.status,
             resolutionDate: rest.resolutionDate === null ? undefined : rest.resolutionDate,
         };
@@ -157,17 +143,9 @@ class ContractService {
         const patchedData = await contractRepository.patchContract(id, updateData);
         if (!patchedData) return new NotFoundError("존재하지 않는 계약입니다");
 
-        const dbStatusToFrontendMap: Record<string, string> = {
-            CAR_INSPECTION: 'carInspection',
-            PRICE_NEGOTIATION: 'priceNegotiation',
-            CONTRACT_DRAFT: 'contractDraft',
-            CONTRACT_SUCCESSFUL: 'contractSuccessful',
-            CONTRACT_FAILED: 'contractFailed',
-        };
-
         return {
             id: patchedData.id,
-            status: dbStatusToFrontendMap[patchedData.status] ?? patchedData.status,
+            status: CONTRACT_STATUS_DB_TO_API[patchedData.status] ?? patchedData.status,
             resolutionDate: patchedData.resolutionDate,
             contractPrice: patchedData.contractPrice,
             meetings: patchedData.meetings.map((meeting) => ({

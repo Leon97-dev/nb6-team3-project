@@ -6,6 +6,7 @@ import {
   PatchContractStruct,
 } from '../../utils/contract-struct.js';
 import { ValidationError } from '../../errors/error-handler.js';
+import { CONTRACT_STATUS_API_TO_DB } from '../../utils/enum-mapper.js';
 
 class ContractController {
   register: RequestHandler = async (req, res) => {
@@ -53,14 +54,8 @@ class ContractController {
     }
 
     if (req.body.status) {
-      const statusMap: Record<string, string> = {
-        carInspection: 'CAR_INSPECTION',
-        priceNegotiation: 'PRICE_NEGOTIATION',
-        contractDraft: 'CONTRACT_DRAFT',
-        contractSuccessful: 'CONTRACT_SUCCESSFUL',
-        contractFailed: 'CONTRACT_FAILED',
-      };
-      req.body.status = statusMap[req.body.status] ?? req.body.status;
+      const mappedStatus = CONTRACT_STATUS_API_TO_DB[req.body.status as keyof typeof CONTRACT_STATUS_API_TO_DB];
+      req.body.status = mappedStatus ?? req.body.status;
     }
 
     if (req.body.contractDocuments && Array.isArray(req.body.contractDocuments)) {
