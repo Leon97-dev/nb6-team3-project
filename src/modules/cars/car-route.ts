@@ -15,7 +15,7 @@ router.post(
   '/upload',
   requireAuth,
   upload.single('file'),
-  CarController.upload
+  CarController.Upload
 );
 // 차량 상세 조회
 router.get('/:carId', requireAuth, CarController.detail);
