@@ -2,6 +2,7 @@ import { Router } from 'express';
 import multer from 'multer';
 import { requireAuth } from '../../middlewares/auth.js';
 import { CarController } from './car-controller.js';
+import { uploadErrorHandler } from '../../middlewares/car-upload.js';
 
 const router = Router();
 const upload = multer({ storage: multer.memoryStorage() });
@@ -15,6 +16,7 @@ router.post(
   '/upload',
   requireAuth,
   upload.single('file'),
+  uploadErrorHandler,
   CarController.Upload
 );
 //차량 모델 목록 조회

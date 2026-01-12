@@ -39,9 +39,18 @@ export class CarService {
     type: CarType
   ) {
     return prisma.carModel.upsert({
-      where: { manufacturer_model: { manufacturer, model } },
+      where: {
+        manufacturer_model: {
+          manufacturer,
+          model,
+        },
+      },
       update: {},
-      create: { manufacturer, model, type },
+      create: {
+        manufacturer,
+        model,
+        type: type as CarType,
+      },
     });
   }
 

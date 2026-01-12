@@ -1,0 +1,17 @@
+import multer from 'multer';
+import { Request, Response, NextFunction } from 'express';
+
+export function uploadErrorHandler(
+  err: any,
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  if (err instanceof multer.MulterError) {
+    return res.status(400).json({
+      message: err.message,
+    });
+  }
+
+  next(err);
+}
