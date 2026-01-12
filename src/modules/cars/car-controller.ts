@@ -126,3 +126,5 @@ export class CarController {
     }
   }
 }
+
+console.log('message');
