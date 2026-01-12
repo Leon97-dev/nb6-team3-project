@@ -12,6 +12,7 @@ import { Readable } from 'stream';
 import { CarCsvSchema } from './car-csv.schema.js';
 import type { Prisma } from '@prisma/client';
 import { z } from 'zod';
+import { CAR_STATUS_DB_TO_API, CAR_TYPE_LABEL_MAP } from '../../utils/enum-mapper.js';
 
 const BATCH_SIZE = 200;
 
@@ -142,11 +143,26 @@ export class CarService {
       carModelId = carModel.id;
     }
 
-    return prisma.car.update({
+    const updatedCar = await prisma.car.update({
       where: { id: carId },
       data: { ...dto, carModelId },
       include: { carModel: true },
     });
+
+    return {
+      id: updatedCar.id,
+      carNumber: updatedCar.carNumber,
+      manufacturer: updatedCar.carModel.manufacturer,
+      model: updatedCar.carModel.model,
+      type: CAR_TYPE_LABEL_MAP[updatedCar.carModel.type] ?? updatedCar.carModel.type,
+      manufacturingYear: updatedCar.manufacturingYear,
+      mileage: updatedCar.mileage,
+      price: updatedCar.price,
+      accidentCount: updatedCar.accidentCount,
+      explanation: updatedCar.explanation,
+      accidentDetails: updatedCar.accidentDetails,
+      status: CAR_STATUS_DB_TO_API[updatedCar.status] ?? updatedCar.status,
+    };
   }
 
   static async delete(companyId: number, carId: number) {
@@ -157,7 +173,7 @@ export class CarService {
   // 차량 모델 목록 조회
   static async listCarModels(
     companyId: number
-  ): Promise<{ data: CarModelListItem[] }> {
+  ): Promise<{ data: CarModelListItem[]; }> {
     const models = await prisma.carModel.findMany({
       where: { cars: { some: { companyId } } },
       select: { manufacturer: true, model: true },
@@ -197,7 +213,7 @@ const CAR_TYPE_MAP: Record<'SEDAN' | 'SUV' | 'TRUCK', CarType> = {
 export class CarServiceBulk {
   static async bulkUploadCsv(companyId: number, buffer: Buffer) {
     let success = 0;
-    const failed: { row: number; reason: string }[] = [];
+    const failed: { row: number; reason: string; }[] = [];
     let batch: CarCsvRow[] = [];
     let rowNumber = 1;
 

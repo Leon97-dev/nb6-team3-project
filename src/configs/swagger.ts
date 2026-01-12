@@ -29,7 +29,11 @@ const options = {
             },
         ],
     },
-    apis: ['./src/modules/**/*-route.ts', './src/modules/**/*-route.js'], // 라우트 파일 경로 패턴
+    apis: [
+        './src/modules/**/*-route.ts',
+        './src/modules/**/*-route.js',
+        './src/modules/**/*-swagger.ts' // 👈 Swagger 전용 파일 스캔 경로 추가
+    ],
 };
 
 export const specs = swaggerJsdoc(options);
