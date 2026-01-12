@@ -158,3 +158,5 @@ temp/
 
 /src/generated/prisma
 .vscode
+/_http
+/uploads

@@ -3,6 +3,7 @@ import contractRepository from './contract-repository.js';
 import * as ContractInterface from '../../utils/contract-interface.js';
 import { NotFoundError, ValidationError } from './../../errors/error-handler.js';
 import { Prisma } from '@prisma/client';
+import { CONTRACT_STATUS_API_TO_DB, CONTRACT_STATUS_DB_TO_API } from '../../utils/enum-mapper.js';
 
 
 class ContractService {
@@ -14,9 +15,11 @@ class ContractService {
         const customerInfo = await contractRepository.findCustomerInfoByCustomerId(contractData.customerId);
         if (!customerInfo) return new NotFoundError("잘못된 요청입니다.(customerId)");
         const _contractName = `${carInfo.carModel?.model ?? '차량'} - ${customerInfo.name} 고객님`;
+        const _contractPrice = carInfo.price;
         const readyData: ContractInterface.CreateContract = {
             ...contractData,
             contractName: _contractName,
+            contractPrice: _contractPrice,
             companyId: companyId.companyId,
             resolutionDate: new Date(),
             userId: contractData.userId as number,
@@ -38,8 +41,11 @@ class ContractService {
         return contract.user?.id === userId;
     }
 
-    async findAll(searchBy: string, keyword: string) {
-        const where: any = {};
+    async findAll(userId: number, searchBy: string, keyword: string) {
+        const companyCode = await contractRepository.findCompanyIdByUserId(userId);
+        if (!companyCode) throw new NotFoundError("사용자의 회사 정보를 찾을 수 없습니다.");
+
+        const where: any = { company: { companyCode } };
         if (keyword) {
             if (searchBy === "customerName") {
                 where.customer = { name: { contains: keyword } };
@@ -49,14 +55,6 @@ class ContractService {
         }
 
         const contracts = await contractRepository.findAll(where);
-
-        const statusKeyMap: Record<string, string> = {
-            CAR_INSPECTION: 'carInspection',
-            PRICE_NEGOTIATION: 'priceNegotiation',
-            CONTRACT_DRAFT: 'contractDraft',
-            CONTRACT_SUCCESSFUL: 'contractSuccessful',
-            CONTRACT_FAILED: 'contractFailed',
-        };
 
         const groupedContracts: Record<string, any> = {
             carInspection: { totalItemCount: 0, data: [] },
@@ -68,7 +66,7 @@ class ContractService {
 
         // status를 기준으로 그룹화하여 반환 형식에 맞게 변환
         const mergedContracts = contracts.reduce((acc: Record<string, any>, contract) => {
-            const statusKey = statusKeyMap[contract.status] ?? contract.status; // DB의 status 값을 키로 사용
+            const statusKey = CONTRACT_STATUS_DB_TO_API[contract.status] ?? contract.status; // DB의 status 값을 키로 사용
 
             if (!acc[statusKey]) {
                 acc[statusKey] = {
@@ -101,19 +99,12 @@ class ContractService {
 
     async patchContract(id: number, data: ContractInterface.PatchContract) {
         const { meetings, contractDocuments, ...rest } = data;
-        const statusKeyMap: Record<string, ContractInterface.ContractStatus> = {
-            carInspection: ContractInterface.ContractStatus.CAR_INSPECTION,
-            priceNegotiation: ContractInterface.ContractStatus.PRICE_NEGOTIATION,
-            contractDraft: ContractInterface.ContractStatus.CONTRACT_DRAFT,
-            contractSuccessful: ContractInterface.ContractStatus.CONTRACT_SUCCESSFUL,
-            contractFailed: ContractInterface.ContractStatus.CONTRACT_FAILED,
-        };
 
         const normalizedRest = {
             ...rest,
             status:
                 rest.status && typeof rest.status === 'string'
-                    ? statusKeyMap[rest.status] ?? rest.status
+                    ? CONTRACT_STATUS_API_TO_DB[rest.status as keyof typeof CONTRACT_STATUS_API_TO_DB] ?? rest.status
                     : rest.status,
             resolutionDate: rest.resolutionDate === null ? undefined : rest.resolutionDate,
         };
@@ -143,7 +134,7 @@ class ContractService {
                 deleteMany: {}, // 기존 문서 연결/데이터 삭제
                 create: contractDocuments.map((doc) => ({
                     fileName: doc.fileName,
-                    fileUrl: doc.fileUrl,
+                    fileUrl: doc.fileUrl ?? "",
                     fileSize: doc.fileSize ?? 0,
                     contentType: doc.contentType ?? 'application/octet-stream',
                 }))
@@ -152,15 +143,33 @@ class ContractService {
         const patchedData = await contractRepository.patchContract(id, updateData);
         if (!patchedData) return new NotFoundError("존재하지 않는 계약입니다");
 
-        return patchedData;
+        return {
+            id: patchedData.id,
+            status: CONTRACT_STATUS_DB_TO_API[patchedData.status] ?? patchedData.status,
+            resolutionDate: patchedData.resolutionDate,
+            contractPrice: patchedData.contractPrice,
+            meetings: patchedData.meetings.map((meeting) => ({
+                date: meeting.date,
+                alarms: meeting.alarms.map((alarm) => alarm.alarmAt)
+            })),
+            user: patchedData.user,
+            customer: patchedData.customer,
+            car: patchedData.car ? {
+                id: patchedData.car.id,
+                model: patchedData.car.carModel?.model ?? null
+            } : null
+        };
     }
     async deleteContract(id: number) {
         const deletedContract = await contractRepository.deleteContract(id);
         if (!deletedContract) return new NotFoundError("존재하지 않는 계약입니다.");
         return deletedContract;
     }
-    async findCarList() {
-        const carList = await contractRepository.findCarList();
+    async findCarList(id: number) {
+        const companyCode = await contractRepository.findCompanyIdByUserId(id);
+        if (!companyCode) throw new NotFoundError("사용자의 회사 정보를 찾을 수 없습니다.");
+        const where: any = { status: "POSSESSION", company: { companyCode } };
+        const carList = await contractRepository.findCarList(where);
         if (!carList) throw new ValidationError("잘못된 요청입니다.");
         const cars = carList.map((car) => ({
             id: car.id,
@@ -168,8 +177,12 @@ class ContractService {
         }));
         return cars;
     }
-    async findCustomerList() {
-        const customerList = await contractRepository.findCustomerList();
+    async findCustomerList(id: number) {
+        const companyCode = await contractRepository.findCompanyIdByUserId(id);
+        if (!companyCode) throw new NotFoundError("사용자의 회사 정보를 찾을 수 없습니다.");
+
+        const where: any = { company: { companyCode } };
+        const customerList = await contractRepository.findCustomerList(where);
         if (!customerList) throw new ValidationError("잘못된 요청입니다.");
         const customers = customerList.map((data) => ({
             id: data.id,
@@ -177,8 +190,12 @@ class ContractService {
         }));
         return customers;
     }
-    async findUserList() {
-        const userList = await contractRepository.findUserList();
+    async findUserList(id: number) {
+        const companyCode = await contractRepository.findCompanyIdByUserId(id);
+        if (!companyCode) throw new NotFoundError("사용자의 회사 정보를 찾을 수 없습니다.");
+
+        const where: any = { company: { companyCode } };
+        const userList = await contractRepository.findUserList(where);
         if (!userList) throw new ValidationError("잘못된 요청입니다.");
         const users = userList.map((data) => ({
             id: data.id,
