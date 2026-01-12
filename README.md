@@ -72,7 +72,7 @@
 ### 오예슬
 
 - 차량 API 개발
-- READMD 문서화 
+- README 문서화 및 Notion 계획서 작성
 
 ---
 
