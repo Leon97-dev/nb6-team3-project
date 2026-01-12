@@ -52,6 +52,17 @@ class ContractController {
       return res.status(403).json({ message: '담당자만 수정이 가능합니다.' });
     }
 
+    if (req.body.status) {
+      const statusMap: Record<string, string> = {
+        carInspection: 'CAR_INSPECTION',
+        priceNegotiation: 'PRICE_NEGOTIATION',
+        contractDraft: 'CONTRACT_DRAFT',
+        contractSuccessful: 'CONTRACT_SUCCESSFUL',
+        contractFailed: 'CONTRACT_FAILED',
+      };
+      req.body.status = statusMap[req.body.status] ?? req.body.status;
+    }
+
     if (req.body.contractDocuments && Array.isArray(req.body.contractDocuments)) {
       req.body.contractDocuments = req.body.contractDocuments.map((doc: any) => ({
         ...doc,
