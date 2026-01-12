@@ -6,6 +6,7 @@ import {
   PatchContractStruct,
 } from '../../utils/contract-struct.js';
 import { ValidationError } from '../../errors/error-handler.js';
+import { CONTRACT_STATUS_API_TO_DB } from '../../utils/enum-mapper.js';
 
 class ContractController {
   register: RequestHandler = async (req, res) => {
@@ -23,6 +24,9 @@ class ContractController {
 
   findAll: RequestHandler = async (req, res) => {
     const { searchBy, keyword } = req.query;
+    const userId = (req as any).user?.id;
+    if (!userId) return new ValidationError('잘못된 요청입니다.(userId)');
+
     // if(!searchBy || !keyword) return new ValidationError("잘못된 요청입니다.");
     if (searchBy) {
       if (searchBy === 'customerName' || searchBy === 'userName') {
@@ -31,6 +35,7 @@ class ContractController {
       }
     }
     const contracts = await contractService.findAll(
+      userId,
       searchBy as string,
       keyword as string
     );
@@ -46,6 +51,19 @@ class ContractController {
     const isWriter = await contractService.validateWriter(contractId, userId);
     if (!isWriter) {
       return res.status(403).json({ message: '담당자만 수정이 가능합니다.' });
+    }
+
+    if (req.body.status) {
+      const mappedStatus = CONTRACT_STATUS_API_TO_DB[req.body.status as keyof typeof CONTRACT_STATUS_API_TO_DB];
+      req.body.status = mappedStatus ?? req.body.status;
+    }
+
+    if (req.body.contractDocuments && Array.isArray(req.body.contractDocuments)) {
+      req.body.contractDocuments = req.body.contractDocuments.map((doc: any) => ({
+        ...doc,
+        id: doc.id ?? 0,
+        fileUrl: doc.fileUrl ?? "",
+      }));
     }
 
     const validatedData = s.create(req.body, PatchContractStruct);
@@ -68,18 +86,24 @@ class ContractController {
     }
 
     await contractService.deleteContract(contractId);
-    return res.status(204).send();
+    return res.status(200).json({ message: '계약 삭제 성공' });
   };
   findCarList: RequestHandler = async (req, res) => {
-    const carList = await contractService.findCarList();
+    const userId = (req as any).user?.id;
+    if (!userId) return new ValidationError('잘못된 요청입니다.(userId)');
+    const carList = await contractService.findCarList(userId);
     return res.status(200).json(carList);
   };
   findCustomerList: RequestHandler = async (req, res) => {
-    const customerList = await contractService.findCustomerList();
+    const userId = (req as any).user?.id;
+    if (!userId) return new ValidationError('잘못된 요청입니다.(userId)');
+    const customerList = await contractService.findCustomerList(userId);
     return res.status(200).json(customerList);
   };
   findUserList: RequestHandler = async (req, res) => {
-    const userList = await contractService.findUserList();
+    const userId = (req as any).user?.id;
+    if (!userId) return new ValidationError('잘못된 요청입니다.(userId)');
+    const userList = await contractService.findUserList(userId);
     return res.status(200).json(userList);
   };
 }
