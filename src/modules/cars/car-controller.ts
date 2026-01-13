@@ -56,7 +56,7 @@ export class CarController {
   // 차량 모델 목록 조회
   static async models(req: Request, res: Response, next: NextFunction) {
     try {
-      const models = await CarService.listCarModels(req.user!.companyId);
+      const models = await CarService.models(req.user!.companyId);
       res.status(200).json(models);
     } catch (e) {
       next(e);
@@ -117,7 +117,7 @@ export class CarController {
         throw new Error('파일이 업로드되지 않았습니다.');
       }
 
-      await CarServiceBulk.bulkUoloadFromCsv(
+      await CarServiceBulk.bulkUploadFromCsv(
         req.user!.companyId,
         req.file.buffer
       );

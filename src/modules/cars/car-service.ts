@@ -7,7 +7,7 @@ import type {
   CarStatusQuery,
 } from '../../types/car.d.js';
 import { CarStatus, CarType } from '@prisma/client';
-import type { Prisma } from '@prisma/client';
+import type { Car, Prisma } from '@prisma/client';
 import { parseCarCsv } from './car-csv.js';
 import {
   CAR_STATUS_DB_TO_API,
@@ -40,22 +40,21 @@ export class CarService {
   static async getOrCreateCarModel(
     manufacturer: string,
     model: string,
-    type: string
+    type: CarType
   ) {
-    const carType = Object.entries(CAR_TYPE_LABEL_MAP).find(
-      ([, label]) => label === type
-    )?.[0] as CarType | undefined;
-
-    if (!carType) {
+    if (!type) {
       throw new ValidationError('잘못된 요청입니다');
     }
+
     return prisma.carModel.upsert({
-      where: { manufacturer_model: { manufacturer, model } },
+      where: {
+        manufacturer_model: { manufacturer, model },
+      },
       update: {},
       create: {
         manufacturer,
         model,
-        type: carType,
+        type,
       },
     });
   }
@@ -73,11 +72,16 @@ export class CarService {
     }
   }
 
+  // 차량 생성
   static async create(companyId: number, dto: CreateCarDto) {
+    if (!dto.type) {
+      throw new ValidationError('잘못된 요청입니다');
+    }
+
     const carModel = await this.getOrCreateCarModel(
       dto.manufacturer,
       dto.model,
-      dto.type
+      CAR_TYPE_LABEL_MAP[dto.type]
     );
 
     return prisma.car.create({
@@ -96,6 +100,7 @@ export class CarService {
     });
   }
 
+  // 차량 목록 조회
   static async list(companyId: number, query: CarListQuery) {
     const page = query.page ?? 1;
     const pageSize = query.pageSize ?? 10;
@@ -145,6 +150,7 @@ export class CarService {
     };
   }
 
+  // 차량 상세 조회
   static async detail(companyId: number, carId: number) {
     const car = await prisma.car.findFirst({
       where: { id: carId, companyId },
@@ -155,6 +161,7 @@ export class CarService {
     return car;
   }
 
+  // 차량 수정
   static async update(companyId: number, carId: number, dto: UpdateCarDto) {
     const car = await this.detail(companyId, carId);
 
@@ -193,13 +200,14 @@ export class CarService {
     };
   }
 
+  // 차량 삭제
   static async delete(companyId: number, carId: number) {
     await this.detail(companyId, carId);
     await prisma.car.delete({ where: { id: carId } });
   }
 
   // 차량 모델 목록 조회
-  static async listCarModels(
+  static async models(
     companyId: number
   ): Promise<{ data: CarModelListItem[] }> {
     const models = await prisma.carModel.findMany({
@@ -230,7 +238,7 @@ export class CarService {
 
 // 차량 데이터 대용량 업로드
 export class CarServiceBulk {
-  static async bulkUoloadFromCsv(
+  static async bulkUploadFromCsv(
     companyId: number,
     buffer: Buffer
   ): Promise<void> {
