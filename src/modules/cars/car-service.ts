@@ -8,7 +8,8 @@ import type {
 } from '../../types/car.d.js';
 import { CarStatus, CarType } from '@prisma/client';
 import type { Prisma } from '@prisma/client';
-import { parseCarCsv } from './car-csv.js';
+import { z } from 'zod';
+import { CAR_STATUS_DB_TO_API, CAR_TYPE_LABEL_MAP } from '../../utils/enum-mapper.js';
 
 const BATCH_SIZE = 200;
 
@@ -154,11 +155,26 @@ export class CarService {
       carModelId = carModel.id;
     }
 
-    return prisma.car.update({
+    const updatedCar = await prisma.car.update({
       where: { id: carId },
       data: { ...dto, carModelId },
       include: { carModel: true },
     });
+
+    return {
+      id: updatedCar.id,
+      carNumber: updatedCar.carNumber,
+      manufacturer: updatedCar.carModel.manufacturer,
+      model: updatedCar.carModel.model,
+      type: CAR_TYPE_LABEL_MAP[updatedCar.carModel.type] ?? updatedCar.carModel.type,
+      manufacturingYear: updatedCar.manufacturingYear,
+      mileage: updatedCar.mileage,
+      price: updatedCar.price,
+      accidentCount: updatedCar.accidentCount,
+      explanation: updatedCar.explanation,
+      accidentDetails: updatedCar.accidentDetails,
+      status: CAR_STATUS_DB_TO_API[updatedCar.status] ?? updatedCar.status,
+    };
   }
 
   static async delete(companyId: number, carId: number) {
@@ -169,7 +185,7 @@ export class CarService {
   // 차량 모델 목록 조회
   static async listCarModels(
     companyId: number
-  ): Promise<{ data: CarModelListItem[] }> {
+  ): Promise<{ data: CarModelListItem[]; }> {
     const models = await prisma.carModel.findMany({
       where: { cars: { some: { companyId } } },
       select: { manufacturer: true, model: true },
@@ -198,14 +214,35 @@ export class CarService {
 
 // 차량 데이터 대용량 업로드
 export class CarServiceBulk {
-  static async bulkUoloadFromCsv(
-    companyId: number,
-    buffer: Buffer
-  ): Promise<void> {
-    const cars: CreateCarDto[] = await parseCarCsv(buffer);
+  static async bulkUploadCsv(companyId: number, buffer: Buffer) {
+    let success = 0;
+    const failed: { row: number; reason: string; }[] = [];
+    let batch: CarCsvRow[] = [];
+    let rowNumber = 1;
 
-    if (cars.length === 0) {
-      throw new ValidationError(null, '잘못된 요청입니다.');
+    for await (const row of Readable.from(buffer).pipe(csv())) {
+      const parsed = CarCsvSchema.safeParse(row);
+
+      if (!parsed.success) {
+        failed.push({
+          row: rowNumber++,
+          reason: parsed.error.issues[0]?.message ?? '잘못된 요청입니다',
+        });
+        continue;
+      }
+
+      batch.push(parsed.data);
+
+      if (batch.length === BATCH_SIZE) {
+        success += await this.insertBatch(companyId, batch);
+        batch = [];
+      }
+
+      rowNumber++;
+    }
+
+    if (batch.length) {
+      success += await this.insertBatch(companyId, batch);
     }
 
     for (let i = 0; i < cars.length; i += BATCH_SIZE) {
