@@ -30,6 +30,29 @@ export { };
  *     responses:
  *       201:
  *         description: 등록 성공
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 id:
+ *                   type: integer
+ *                 companyName:
+ *                   type: string
+ *                 companyCode:
+ *                   type: string
+ *                 userCount:
+ *                   type: integer
+ *       400:
+ *         description: 잘못된 요청입니다
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "잘못된 요청입니다"
  *       401:
  *         description: 권한이 없습니다
  *         content:
@@ -80,6 +103,8 @@ export { };
  *                     type: integer
  *                   totalPages:
  *                     type: integer
+ *                   totalItemCount:
+ *                     type: integer
  *                   data:
  *                     type: array
  *                     items:
@@ -91,6 +116,28 @@ export { };
  *                           type: string
  *                         companyCode:
  *                           type: string
+ *                         userCount:
+ *                           type: integer
+ *       400:
+ *         description: 잘못된 요청입니다
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "잘못된 요청입니다"
+ *       401:
+ *         description: 관리자 권한이 필요합니다
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "관리자 권한이 필요합니다"
  */
 
 /**
@@ -118,6 +165,57 @@ export { };
  *     responses:
  *       200:
  *         description: 조회 성공
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 currentPage:
+ *                   type: integer
+ *                 totalPages:
+ *                   type: integer
+ *                 totalItemCount:
+ *                   type: integer
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: integer
+ *                       name:
+ *                         type: string
+ *                       email:
+ *                         type: string
+ *                       employeeNumber:
+ *                         type: string
+ *                       phoneNumber:
+ *                         type: string
+ *                       company:
+ *                         type: object
+ *                         properties:
+ *                           companyName:
+ *                             type: string
+ *       400:
+ *         description: 잘못된 요청입니다
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "잘못된 요청입니다"
+ *       401:
+ *         description: 관리자 권한이 필요합니다
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "관리자 권한이 필요합니다"
  */
 
 /**
@@ -147,8 +245,49 @@ export { };
  *     responses:
  *       200:
  *         description: 수정 성공
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 id:
+ *                   type: integer
+ *                 companyName:
+ *                   type: string
+ *                 companyCode:
+ *                   type: string
+ *                 userCount:
+ *                   type: integer
+ *       400:
+ *         description: 잘못된 요청입니다
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "잘못된 요청입니다"
+ *       401:
+ *         description: 관리자 권한이 필요합니다
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "관리자 권한이 필요합니다"
  *       404:
  *         description: 존재하지 않는 회사입니다
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "존재하지 않는 회사입니다"
  */
 
 /**
@@ -168,6 +307,42 @@ export { };
  *     responses:
  *       200:
  *         description: 삭제 성공
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "회사 삭제 성공"
+ *       400:
+ *         description: 잘못된 요청입니다
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "잘못된 요청입니다"
+ *       401:
+ *         description: 관리자 권한이 필요합니다
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "관리자 권한이 필요합니다"
  *       404:
  *         description: 존재하지 않는 회사입니다
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "존재하지 않는 회사입니다"
  */
