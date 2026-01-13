@@ -1,8 +1,11 @@
 import csv from 'csv-parser';
 import { Readable } from 'stream';
+import { z } from 'zod';
 import { ValidationError } from '../../errors/error-handler.js';
 import type { CreateCarDto } from '../../types/car.d.js';
 import { CarType } from '@prisma/client';
+
+//CSV → enum 매핑
 
 const CAR_TYPE_MAP: Record<string, CarType> = {
   COMPACT: CarType.COMPACT,
@@ -12,14 +15,35 @@ const CAR_TYPE_MAP: Record<string, CarType> = {
   SUV: CarType.SUV,
 };
 
+//CSV Row Zod Schema
+
+const CarCsvRowSchema = z.object({
+  carNumber: z.string().min(1),
+  manufacturer: z.string().min(1),
+  model: z.string().min(1),
+  type: z.string(),
+  manufacturingYear: z.coerce.number().int(),
+  mileage: z.coerce.number().int(),
+  price: z.coerce.number().int(),
+  accidentCount: z.coerce.number().int(),
+  explanation: z.string().optional(),
+  accidentDetails: z.string().optional(),
+});
+
+type CarCsvRow = z.infer<typeof CarCsvRowSchema>;
+
+//CSV Parser
+
 export async function parseCarCsv(buffer: Buffer): Promise<CreateCarDto[]> {
   const cars: CreateCarDto[] = [];
   const stream = Readable.from(buffer);
 
   let rowNumber = 1;
 
-  for await (const row of stream.pipe(csv())) {
+  for await (const rawRow of stream.pipe(csv())) {
     try {
+      const row: CarCsvRow = CarCsvRowSchema.parse(rawRow);
+
       const type = CAR_TYPE_MAP[row.type];
       if (!type) {
         throw new ValidationError(
@@ -33,12 +57,12 @@ export async function parseCarCsv(buffer: Buffer): Promise<CreateCarDto[]> {
         manufacturer: row.manufacturer,
         model: row.model,
         type,
-        manufacturingYear: Number(row.manufacturingYear),
-        mileage: Number(row.mileage),
-        price: Number(row.price),
-        accidentCount: Number(row.accidentCount),
-        explanation: row.explanation || undefined,
-        accidentDetails: row.accidentDetails || undefined,
+        manufacturingYear: row.manufacturingYear,
+        mileage: row.mileage,
+        price: row.price,
+        accidentCount: row.accidentCount,
+        explanation: row.explanation ?? null,
+        accidentDetails: row.accidentDetails ?? null,
       });
     } catch (e) {
       throw new ValidationError(
