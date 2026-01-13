@@ -49,10 +49,26 @@ app.use(compression());
 app.use(express.json());
 app.use('/upload', express.static('public/uploads'));
 
-// Swagger UI 연결
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
 
+// 1. 각 모듈별 JSON 데이터를 제공할 라우트 생성
+specs.forEach(({ slug, spec }) => {
+  app.get(`/api-docs/${slug}.json`, (req, res) => res.json(spec));
+});
 
+// 2. Swagger UI 설정 (Explorer 모드 활성화)
+app.use(
+  '/api-docs',
+  swaggerUi.serve,
+  swaggerUi.setup(null, {
+    explorer: true, // 상단 검색창(Explorer) 활성화
+    swaggerOptions: {
+      urls: specs.map(({ name, slug }) => ({
+        name: name,
+        url: `/api-docs/${slug}.json`,
+      })),
+    },
+  })
+);
 // ============================================
 // 라우터 등록 (여기에 추가 하세요!)
 // ============================================
