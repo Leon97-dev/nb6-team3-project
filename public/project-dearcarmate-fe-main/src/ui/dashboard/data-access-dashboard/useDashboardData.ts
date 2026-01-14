@@ -2,11 +2,11 @@ import { getDashboardData } from '@shared/api'
 import { useQuery } from '@tanstack/react-query'
 
 const useDashboardData = () => {
-  const query = useQuery({
-    queryKey: ['dashboard'],
-    queryFn: async () => await getDashboardData(),
-    throwOnError: true,
-  })
+  const query = useQuery(
+    ['dashboard'],
+    async () => await getDashboardData(),
+    {},
+  )
 
   return query
 }

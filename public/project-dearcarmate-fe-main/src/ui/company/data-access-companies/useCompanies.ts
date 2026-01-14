@@ -12,18 +12,19 @@ const useCompanies = ({
   searchBy: SearchByCompany
   keyword: string
 }) => {
-  const query = useQuery({
-    queryKey: ['companies', { page, searchBy, keyword }],
-    queryFn: async () =>
+  const query = useQuery(
+    ['companies', { page, searchBy, keyword }],
+    async () =>
       await getCompanies({
         page,
         pageSize: COMPANIES_PAGE_SIZE,
         searchBy,
         keyword,
       }),
-    staleTime: 60 * 1000 * 10, // 10 minutes
-    throwOnError: true,
-  })
+    {
+      staleTime: 60 * 1000 * 10, // 10 minutes
+      },
+  )
 
   return query
 }

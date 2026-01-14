@@ -1,11 +1,11 @@
 /** @type {import('next').NextConfig} */
 const path = require('path');
 
-module.exports = {
+const nextConfig = {
   reactStrictMode: true,
   sassOptions: {
     includePaths: [path.join(__dirname, 'styles')],
-    prependData: `@use "src/styles/utils.scss" as *;`,
+    additionalData: `@use "src/styles/utils.scss" as *;\n@use "src/styles/mixin.scss" as *;`,
   },
   images: {
     remotePatterns: [
@@ -14,10 +14,6 @@ module.exports = {
       },
     ],
   },
-};
-
-/** @type {import('next').NextConfig} */
-const nextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },

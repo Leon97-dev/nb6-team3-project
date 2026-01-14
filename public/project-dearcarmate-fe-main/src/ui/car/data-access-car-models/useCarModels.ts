@@ -2,13 +2,9 @@ import { useQuery } from '@tanstack/react-query'
 import { getCarModels } from '@shared/api'
 
 const useCarModels = () => {
-  const query = useQuery({
-    queryKey: ['carModels'],
-    queryFn: async () => {
-      const response = await getCarModels()
-      return response.data
-    },
-    throwOnError: true,
+  const query = useQuery(['carModels'], async () => {
+    const response = await getCarModels()
+    return response.data
   })
 
   return query

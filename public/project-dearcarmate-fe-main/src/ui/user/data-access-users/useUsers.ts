@@ -12,17 +12,17 @@ const useUsers = ({
   searchBy: SearchByUser
   keyword: string
 }) => {
-  const query = useQuery({
-    queryKey: ['users', { page, searchBy, keyword }],
-    queryFn: async () =>
+  const query = useQuery(
+    ['users', { page, searchBy, keyword }],
+    async () =>
       await getCompanyUsers({
         page,
         pageSize: USERS_PAGE_SIZE,
         searchBy,
         keyword,
       }),
-    throwOnError: true,
-  })
+    {},
+  )
 
   return query
 }

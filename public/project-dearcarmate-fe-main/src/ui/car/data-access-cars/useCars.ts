@@ -14,9 +14,9 @@ const useCars = ({
   keyword: string
   status: CarStatusParam
 }) => {
-  const query = useQuery({
-    queryKey: ['cars', { page, searchBy, keyword, status }],
-    queryFn: async () =>
+  const query = useQuery(
+    ['cars', { page, searchBy, keyword, status }],
+    async () =>
       await getCars({
         page,
         pageSize: CARS_PAGE_SIZE,
@@ -24,8 +24,8 @@ const useCars = ({
         keyword,
         status,
       }),
-    throwOnError: true,
-  })
+    {},
+  )
 
   return query
 }

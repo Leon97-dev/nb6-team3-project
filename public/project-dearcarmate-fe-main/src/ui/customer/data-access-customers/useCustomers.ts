@@ -12,18 +12,19 @@ const useCustomers = ({
   searchBy: SearchByCustomer
   keyword: string
 }) => {
-  const query = useQuery({
-    queryKey: ['customers', { page, searchBy, keyword }],
-    queryFn: async () =>
+  const query = useQuery(
+    ['customers', { page, searchBy, keyword }],
+    async () =>
       await getCustomers({
         page,
         pageSize: CUSTOMERS_PAGE_SIZE,
         searchBy,
         keyword,
       }),
-    staleTime: 60 * 1000 * 3, // 3 minutes
-    throwOnError: true,
-  })
+    {
+      staleTime: 60 * 1000 * 3, // 3 minutes
+      },
+  )
 
   return query
 }

@@ -1,16 +1,17 @@
-import { getCustomersForContract } from '@shared/api';
-import { useQuery } from '@tanstack/react-query';
+import { getCustomersForContract } from '@shared/api'
+import { useQuery } from '@tanstack/react-query'
 
 const useCustomersForContract = (keyword: string) => {
-  const query = useQuery({
-    queryKey: ['customersForContract', keyword],
-    queryFn: async () => await getCustomersForContract(keyword),
-    staleTime: 60 * 1000 * 3, // 3 minutes
-    keepPreviousData: true,
-    useErrorBoundary: true,
-  });
+  const query = useQuery(
+    ['customersForContract', keyword],
+    async () => await getCustomersForContract(keyword),
+    {
+      staleTime: 60 * 1000 * 3, // 3 minutes
+      keepPreviousData: true,
+      },
+  )
 
-  return query;
-};
+  return query
+}
 
-export default useCustomersForContract;
+export default useCustomersForContract

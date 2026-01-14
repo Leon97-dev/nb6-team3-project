@@ -2,9 +2,9 @@ import { getCar, getCarsForContract } from '@shared/api'
 import { useQuery } from '@tanstack/react-query'
 
 const useCarsForContract = (carId?: number) => {
-  const query = useQuery({
-    queryKey: ['carsForContract', carId],
-    queryFn: async () => {
+  const query = useQuery(
+    ['carsForContract', carId],
+    async () => {
       const [currentCar, possessionCarItems] = await Promise.all([
         carId ? getCar(carId) : null,
         getCarsForContract(),
@@ -18,8 +18,8 @@ const useCarsForContract = (carId?: number) => {
         ...possessionCarItems,
       ] : possessionCarItems
     },
-    throwOnError: true,
-  })
+    {},
+  )
 
   return query
 }
