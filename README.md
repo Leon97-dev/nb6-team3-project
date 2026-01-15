@@ -5,7 +5,7 @@
 
 중급 프로젝트 - Dear Carmate
 
-관련 문서: [Notion](https://www.notion.so/PART-3-2ce598c5573d80ec8610c0e87676bc99) [발표 자료PDF](https://www.notion.so/DEAR_CARMATE-2e6f76d8c01480b6ac70e33f90b0890d) [Swagger](http://localhost:3000/api-docs/#/)
+관련 문서: [Notion](https://www.notion.so/PART-3-2ce598c5573d80ec8610c0e87676bc99) [발표 자료PDF](https://www.notion.so/DEAR_CARMATE-2e6f76d8c01480b6ac70e33f90b0890d)
 
 ---
 
@@ -130,8 +130,8 @@ NB6-TEAM3-PROJECT/
 
 ## 구현 홈페이지
 
-[Dear Carmate]()
+[Dear Carmate](https://dear-carmate-service.onrender.com/)
 
 ---
 
-### 최근 수정: 26.01.13
+### 최근 수정: 26.01.15
