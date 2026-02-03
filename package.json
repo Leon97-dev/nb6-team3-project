@@ -19,7 +19,7 @@
     "prisma:migrate": "prisma migrate dev",
     "prisma:studio": "prisma studio",
     "prisma:deploy": "prisma migrate deploy",
-    "test": "echo \"no test yet\" && exit 0"
+    "test": "jest"
   },
   "keywords": [],
   "author": "NB6-3팀",
@@ -55,6 +55,7 @@
     "@types/compression": "^1.8.1",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
+    "@types/jest": "^30.0.0",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/ms": "^2.1.0",
     "@types/multer": "^2.0.0",
@@ -62,10 +63,12 @@
     "@types/nodemailer": "^7.0.4",
     "@types/swagger-jsdoc": "^6.0.4",
     "@types/swagger-ui-express": "^4.1.8",
+    "jest": "^30.2.0",
     "nodemailer": "^7.0.11",
     "nodemon": "^3.1.11",
     "prettier": "^3.6.2",
     "prisma": "^6.19.0",
+    "ts-jest": "^29.4.6",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3"
   }
