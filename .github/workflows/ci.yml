@@ -2,32 +2,30 @@ name: CI
 
 on:
   push:
-    branches: ['main']
+    branches:
+      - main # main 브랜치에 푸시될 때 실행
   pull_request:
-    branches: ['main']
+    branches:
+      - main # main 브랜치로 향하는 Pull Request가 생성/업데이트될 때 실행
 
 jobs:
   test:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-      - uses: actions/setup-node@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
         with:
-          node-version: 20
+          node-version: 'lts/*' # 또는 프로젝트에 필요한 Node.js 버전
 
-      - run: npm install
-      - run: npm test
+      - name: Install dependencies
+        run: npm install
 
-  build:
-    runs-on: ubuntu-latest
-    needs: test
-    steps:
-      - uses: actions/checkout@v4
+      - name: Type Check
+        run: npm run typecheck
 
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-
-      - run: npm install
-      - run: npm run build
+      - name: Run Tests
+        run: npm run test
